@@ -1,0 +1,166 @@
+@page
+@model Guc_Uni_System.Pages.Admin.AdminPartTwoModel
+@{
+    ViewData["Title"] = "Admin Component - Part 2";
+}
+
+<div class="container mt-4">
+    <h2>Admin Dashboard (Part 2)</h2>
+    <hr />
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+            @Model.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    View Records (Views)
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 mb-3">
+                        <form method="post" asp-page-handler="ViewYesterdayAttendance">
+                            <button class="btn btn-outline-primary">Fetch Yesterday's Attendance</button>
+                        </form>
+                        <form method="post" asp-page-handler="ViewWinterPerformance">
+                            <button class="btn btn-outline-info">Fetch Winter Performance</button>
+                        </form>
+                    </div>
+
+                    @if (Model.AttendanceRecords.Any())
+                    {
+                        <h5>Attendance Records</h5>
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Emp ID</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var record in Model.AttendanceRecords)
+                                {
+                                    <tr>
+                                        <td>@record.Employee_id</td>
+                                        <td>@record.start_date</td>
+                                        <td>@record.status</td>
+                                        <td>@record.start_time</td>
+                                        <td>@record.end_time</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+
+                    @if (Model.PerformanceRecords.Any())
+                    {
+                        <h5>Winter Performance Records</h5>
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Emp ID</th>
+                                    <th>Semester</th>
+                                    <th>Course</th>
+                                    <th>Missing Hours</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var record in Model.PerformanceRecords)
+                                {
+                                    <tr>
+                                        <td>@record.Employee_id</td>
+                                        <td>@record.semester_code</td>
+                                        <td>@record.course_name</td>
+                                        <td>@record.missing_hours</td>
+                                        <td>@record.rating</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    General Updates
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="RemoveHolidayAttendance" class="mb-3">
+                        <label class="form-label">Clean up records for Official Holidays:</label>
+                        <button class="btn btn-danger w-100">Remove Holiday Attendance</button>
+                    </form>
+                    <hr/>
+                    
+                    <form method="post" asp-page-handler="UpdateDailyStatus" class="mb-3">
+                        <label class="form-label fw-bold">Update Employment Status</label>
+                        <div class="input-group">
+                            <input type="number" asp-for="TargetEmployeeId" class="form-control" placeholder="Enter Emp ID" required />
+                            <button class="btn btn-warning">Update Status</button>
+                        </div>
+                        <small class="text-muted">Updates status based on leaves/active state.</small>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">
+                    Targeted Employee Actions
+                </div>
+                <div class="card-body">
+                    
+                    <form method="post" class="mb-4 border-bottom pb-3">
+                        <label class="form-label fw-bold">Manage Attendance Anomalies</label>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">Emp ID</span>
+                            <input type="number" asp-for="TargetEmployeeId" class="form-control" placeholder="ID" required />
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" asp-page-handler="RemoveUnattendedDayOff" class="btn btn-secondary btn-sm">Remove Unattended DayOff</button>
+                            <button type="submit" asp-page-handler="RemoveApprovedLeaves" class="btn btn-secondary btn-sm">Remove Approved Leaves</button>
+                        </div>
+                    </form>
+
+                    <form method="post" asp-page-handler="ReplaceEmployee">
+                        <label class="form-label fw-bold">Replace Employee</label>
+                        <div class="row g-2 mb-2">
+                            <div class="col">
+                                <input type="number" name="TargetEmployeeId" class="form-control" placeholder="Old ID" required />
+                            </div>
+                            <div class="col">
+                                <input type="number" asp-for="NewEmployeeId" class="form-control" placeholder="New ID" required />
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col">
+                                <label class="small">From Date</label>
+                                <input type="date" asp-for="FromDate" class="form-control" required />
+                            </div>
+                            <div class="col">
+                                <label class="small">To Date</label>
+                                <input type="date" asp-for="ToDate" class="form-control" required />
+                            </div>
+                        </div>
+                        <button class="btn btn-dark w-100">Replace Employee</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
