@@ -1,390 +1,397 @@
-﻿
-@page "/Academic/Dashboard"
-@model YourAppNamespace.Pages.Academic.AcademicDashboardModel // Assumes a PageModel namespace
+﻿@page
+@model Guc_Uni_System.Pages.Academic.AcademicDashboardModel
 @{
-    ViewData["Title"] = "Academic Employee Dashboard";
-    // Get the current tab from the query string, default to 'summary'
-    var activeTab = Context.Request.Query["tab"].ToString().ToLowerInvariant() ?? "summary";
-
-    // MOCK Employee details for the summary section (replace with Model properties)
-    var mockEmployeeDetails = new HR.Models.Employee 
-    { 
-        FirstName = "Jane", LastName = "Doe", EmployeeId = 101, AnnualBalance = 20, 
-        AccidentalBalance = 6, DepartmentName = "Media Engineering" 
-    };
+    ViewData["Title"] = "Academic Dashboard";
+    var activeTab = Models.UniversityHrManagementSystemContext.Request.Query["tab"].ToString() ?? "summary";
+    var employee = Model.EmployeeDetails;
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; }
-        .tab-button { transition: all 0.2s; }
-        .tab-button.active { border-color: #4f46e5; color: #4f46e5; font-weight: 600; }
-        .content-card { min-height: 400px; }
-    </style>
-</head>
-<body class="p-4 md:p-8">
-    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl p-6 lg:p-10">
-        <header class="flex justify-between items-center border-b pb-4 mb-6">
-            <h1 class="text-3xl font-extrabold text-gray-900">
-                Academic Portal
-            </h1>
-            <div class="flex items-center space-x-4">
-                <span class="text-indigo-600 font-semibold hidden sm:inline">
-                    Hello, @mockEmployeeDetails.FirstName @mockEmployeeDetails.LastName
-                </span>
-                <a asp-page="/Login" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition duration-150 shadow-md">
-                    Log Out
-                </a>
-            </div>
-        </header>
+<!-- Load Bootstrap for styling (Assuming this template uses Bootstrap) -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+<style>
+    /* Custom styles for better visual appeal */
+    body {
+        background-color: #f8f9fa;
+    }
 
-        <!-- Status Message Area -->
+    .container {
+        max-width: 1100px;
+    }                       
+
+    .card {
+        border-radius: 0.75rem;
+        border: none;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    }
+
+    .shadow-lg {
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+    }
+
+    .nav-link.active {
+        border-color: #007bff #007bff #f8f9fa;
+        background-color: #fff;
+        color: #007bff !important;
+        font-weight: 600;
+    }
+
+    .nav-tabs .nav-link {
+        color: #495057;
+    }
+
+    .badge {
+        font-size: 0.9em;
+        padding: 0.5em 0.8em;
+    }
+</style>
+
+<div class="container py-4">
+    <h1 class="mb-4 text-primary">Academic Employee Dashboard</h1>
+
+    @if (employee == null)
+    {
+        <div class="alert alert-danger" role="alert">
+            Cannot load employee data. Please ensure you are logged in.
+        </div>
+    }
+    else
+    {
+        <h3 class="mb-4">Welcome, @employee.FirstName @employee.LastName (ID: @employee.EmployeeId)</h3>
+
+        <!-- Status Message Display (for success/error from POSTs) -->
         @if (!string.IsNullOrEmpty(Model.StatusMessage))
         {
-            var isSuccess = Model.IsSuccess; // Assumes a boolean property on the Model
-            <div class="@(isSuccess ? "bg-green-100 border-green-400 text-green-700" : "bg-red-100 border-red-400 text-red-700") border px-4 py-3 rounded-md relative mb-6" role="alert">
-                <p>@Model.StatusMessage</p>
+            <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+                @Model.StatusMessage
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
         }
 
         <!-- Tab Navigation -->
-        <nav class="border-b border-gray-200">
-            <div class="flex flex-wrap -mb-px">
-                @{
-                    // List of tabs corresponding to the 6 requirements + summary
-                    var tabs = new (string key, string title, string icon)[]
-                    {
-                        ("summary", "Summary", "🏠"),
-                        ("performance", "Performance", "⭐"),      // Req 2
-                        ("attendance", "Attendance", "⌚"),        // Req 3
-                        ("payroll", "Payroll", "💵"),              // Req 4
-                        ("deductions", "Deductions", "📉"),        // Req 5
-                        ("annualleave", "Annual Leave", "🏖️"),     // Req 6
-                        ("leavestatus", "Leave Status", "📅")      // Req 7
-                    };
-                }
-                @foreach (var tab in tabs)
-                {
-                    <a href="?tab=@tab.key"
-                       class="tab-button inline-flex items-center h-12 px-4 text-sm whitespace-nowrap border-b-2 @(activeTab == tab.key ? "active border-indigo-500 text-indigo-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300")">
-                        @tab.icon <span class="ml-2 hidden sm:inline">@tab.title</span>
-                    </a>
-                }
-            </div>
-        </nav>
+        <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "summary" ? "active" : "")" href="?tab=summary">Summary</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "performance" ? "active" : "")" href="?tab=performance">Performance (Req 2)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "attendance" ? "active" : "")" href="?tab=attendance">Attendance (Req 3)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "payroll" ? "active" : "")" href="?tab=payroll">Payroll (Req 4)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "deductions" ? "active" : "")" href="?tab=deductions">Deductions (Req 5)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "annualleave" ? "active" : "")" href="?tab=annualleave">Annual Leave (Req 6)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "leavestatus" ? "active" : "")" href="?tab=leavestatus">Leave Status (Req 7)</a>
+            </li>
+        </ul>
 
-        <!-- Tab Content Area -->
-        <div class="mt-8 content-card">
+        <!-- Tab Content -->
+        <div class="tab-content" id="dashboardTabContent">
 
-            @if (activeTab == "summary")
-            {
-                <section>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Account Summary</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-indigo-50 p-6 rounded-xl shadow-lg">
-                            <h3 class="text-lg font-semibold text-indigo-700">Annual Leave</h3>
-                            <p class="text-4xl font-bold mt-2 text-indigo-900">@mockEmployeeDetails.AnnualBalance</p>
-                            <p class="text-sm text-indigo-600">Days Remaining</p>
+            <!-- 1. Summary Tab (Req 1) -->
+            <div class="tab-pane fade @(activeTab == "summary" ? "show active" : "")" id="summary" role="tabpanel">
+                <h4>Employee Details</h4>
+                <div class="card p-4 shadow-sm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Department:</strong> @employee.DepartmentName</p>
+                            <p><strong>Official Day Off:</strong> @employee.OfficialDayOff</p>
+                            <p><strong>Email:</strong> @employee.Email</p>
                         </div>
-                        <div class="bg-pink-50 p-6 rounded-xl shadow-lg">
-                            <h3 class="text-lg font-semibold text-pink-700">Accidental Leave</h3>
-                            <p class="text-4xl font-bold mt-2 text-pink-900">@mockEmployeeDetails.AccidentalBalance</p>
-                            <p class="text-sm text-pink-600">Days Remaining</p>
-                        </div>
-                        <div class="bg-gray-50 p-6 rounded-xl shadow-lg">
-                            <h3 class="text-lg font-semibold text-gray-700">Department</h3>
-                            <p class="text-xl font-bold mt-2 text-gray-900">@mockEmployeeDetails.DepartmentName</p>
-                            <p class="text-sm text-gray-600">Employee ID: @mockEmployeeDetails.EmployeeId</p>
+                        <div class="col-md-6">
+                            <h5 class="mt-2">Leave Balances</h5>
+                            <div class="alert alert-success p-2">
+                                <strong>Annual Balance:</strong> @employee.AnnualBalance days
+                            </div>
+                            <div class="alert alert-info p-2">
+                                <strong>Accidental Balance:</strong> @employee.AccidentalBalance days
+                            </div>
                         </div>
                     </div>
-                </section>
-            }
+                </div>
+            </div>
 
-            <!-- 2. Retrieve my performance for a certain semester. -->
-            @if (activeTab == "performance")
-            {
-                <section>
-                    <h2 class="text-2xl font-bold text-indigo-700 mb-6">Performance Records</h2>
+            <!-- 2. Performance Tab (Req 2) -->
+            <div class="tab-pane fade @(activeTab == "performance" ? "show active" : "")" id="performance" role="tabpanel">
+                <h4>Performance Records</h4>
 
-                    <!-- Filter Form -->
-                    <form method="get" class="mb-6 flex space-x-4 items-center" asp-page-handler="FilterPerformance">
-                        <input type="hidden" name="tab" value="performance" />
-                        <label for="SelectedSemester" class="font-medium text-gray-700">Select Semester:</label>
-                        <select id="SelectedSemester" name="SelectedSemester" class="p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">-- All Semesters --</option>
-                            @* Assume Model has a list of available semesters, or hardcode common ones *@
-                            <option value="W25">W25</option>
-                            <option value="S24">S24</option>
-                            <option value="W24">W24</option>
-                        </select>
-                        <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition">Filter</button>
-                    </form>
+                <form method="get" class="form-inline mb-4">
+                    <input type="hidden" name="tab" value="performance" />
+                    <div class="form-group mr-3">
+                        <label for="SelectedSemester" class="mr-2">Filter by Semester:</label>
+                        <input type="text" class="form-control" id="SelectedSemester" name="SelectedSemester" value="@Model.SelectedSemester" placeholder="e.g., W25" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Apply Filter</button>
+                </form>
 
-                    <!-- Results Table -->
-                    @if (Model.PerformanceRecords != null && Model.PerformanceRecords.Count > 0)
-                    {
-                        <div class="bg-white rounded-xl shadow-md overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating (1-5)</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @* Loop through Model.PerformanceRecords *@
-                                    @foreach (var record in Model.PerformanceRecords)
-                                    {
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">@record.Semester</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full @(record.Rating >= 4 ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800")">
-                                                    @record.Rating
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">@record.Comments</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-gray-500">No performance records available for this filter.</p>
-                    }
-                </section>
-            }
-
-            <!-- 3. Retrieve attendance records for the current month. -->
-            @if (activeTab == "attendance")
-            {
-                <section>
-                    <h2 class="text-2xl font-bold text-indigo-700 mb-6">Current Month Attendance Records</h2>
-                    <p class="text-gray-600 mb-4">Excluding your unattended official day off.</p>
-
-                    @if (Model.AttendanceRecords != null && Model.AttendanceRecords.Count > 0)
-                    {
-                        <div class="bg-white rounded-xl shadow-md overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check In</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check Out</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @* Loop through Model.AttendanceRecords *@
-                                    @foreach (var record in Model.AttendanceRecords)
-                                    {
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">@record.Date.ToShortDateString()</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@record.CheckInTime.ToString("hh\\:mm")</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@record.CheckOutTime.ToString("hh\\:mm")</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@record.TotalDuration</td> @* Assumes TotalDuration is a TimeSpan or string *@
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-gray-500">No attendance records found for the current month.</p>
-                    }
-                </section>
-            }
-
-            <!-- 4. Retrieve last month's payroll details -->
-            @if (activeTab == "payroll")
-            {
-                <section>
-                    <h2 class="text-2xl font-bold text-indigo-700 mb-6">Last Month's Payroll Details</h2>
-                    
-                    @if (Model.LastPayroll != null)
-                    {
-                        <div class="bg-green-50 p-6 rounded-xl shadow-lg border-l-8 border-green-600 max-w-lg">
-                            <h3 class="text-xl font-bold text-green-800 mb-4">Payment Date: @Model.LastPayroll.PaymentDate.ToShortDateString()</h3>
-                            
-                            <dl class="text-gray-700 space-y-2">
-                                <div class="flex justify-between border-b pb-1">
-                                    <dt>Base Salary</dt>
-                                    <dd class="font-medium">@Model.LastPayroll.BaseSalary.ToString("C")</dd>
-                                </div>
-                                <div class="flex justify-between border-b pb-1">
-                                    <dt>Bonus Amount</dt>
-                                    <dd class="font-medium text-green-600">+ @Model.LastPayroll.BonusAmount.ToString("C")</dd>
-                                </div>
-                                <div class="flex justify-between border-b pb-1">
-                                    <dt>Deductions Amount</dt>
-                                    <dd class="font-medium text-red-600">- @Model.LastPayroll.DeductionsAmount.ToString("C")</dd>
-                                </div>
-                                <div class="flex justify-between pt-2">
-                                    <dt class="text-lg font-bold">FINAL SALARY</dt>
-                                    <dd class="text-lg font-bold text-indigo-700">@Model.LastPayroll.FinalSalaryAmount.ToString("C")</dd>
-                                </div>
-                            </dl>
-                            <p class="text-sm text-gray-500 mt-4">Period: @Model.LastPayroll.FromDate.ToShortDateString() - @Model.LastPayroll.ToDate.ToShortDateString()</p>
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-gray-500">Last month's payroll details are not yet available.</p>
-                    }
-                </section>
-            }
-
-            <!-- 5. Fetch all deductions caused by attendance issues in a certain period. -->
-            @if (activeTab == "deductions")
-            {
-                <section>
-                    <h2 class="text-2xl font-bold text-indigo-700 mb-6">Attendance Deductions by Period</h2>
-
-                    <!-- Filter Form -->
-                    <form method="get" class="mb-6 flex space-x-4 items-center" asp-page-handler="FilterDeductions">
-                        <input type="hidden" name="tab" value="deductions" />
-                        <label for="DeductionStartDate" class="font-medium text-gray-700">From:</label>
-                        <input type="date" name="DeductionStartDate" required class="p-2 border border-gray-300 rounded-lg" />
-                        
-                        <label for="DeductionEndDate" class="font-medium text-gray-700">To:</label>
-                        <input type="date" name="DeductionEndDate" required class="p-2 border border-gray-300 rounded-lg" />
-                        
-                        <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition">Fetch Deductions</button>
-                    </form>
-
-                    <!-- Results Table -->
-                    @if (Model.Deductions != null && Model.Deductions.Count > 0)
-                    {
-                        <div class="bg-white rounded-xl shadow-md overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason/Source ID</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @* Loop through Model.Deductions *@
-                                    @foreach (var deduction in Model.Deductions)
-                                    {
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">@deduction.Date.ToShortDateString()</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@deduction.Type</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-red-600">@deduction.Amount.ToString("C")</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Attendance ID: @deduction.AttendanceID</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-gray-500">No attendance-related deductions found for the specified period.</p>
-                    }
-                </section>
-            }
-
-            <!-- 6. Apply for an annual leave. -->
-            @if (activeTab == "annualleave")
-            {
-                <section>
-                    <h2 class="text-2xl font-bold text-indigo-700 mb-6">Annual Leave Request</h2>
-                    <p class="text-gray-600 mb-4">Available balance: <span class="font-bold text-indigo-600">@mockEmployeeDetails.AnnualBalance days</span></p>
-
-                    <form method="post" asp-page-handler="SubmitAnnualLeave" class="max-w-md bg-gray-50 p-6 rounded-xl shadow-inner">
-                        <input type="hidden" name="tab" value="annualleave" />
-
-                        <div class="mb-4">
-                            <label for="StartDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                            <input type="date" id="StartDate" name="StartDate" required class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="EndDate" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                            <input type="date" id="EndDate" name="EndDate" required class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
-                        </div>
-
-                        <div class="mb-6">
-                            <label for="ReplacementEmpId" class="block text-sm font-medium text-gray-700 mb-1">Replacement Employee ID</label>
-                            <input type="number" id="ReplacementEmpId" name="ReplacementEmpId" required class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="e.g., 102" />
-                            <p class="text-xs text-gray-500 mt-1">A valid replacement employee must be specified.</p>
-                        </div>
-
-                        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200 shadow-md">
-                            Submit Annual Leave
-                        </button>
-                    </form>
-                </section>
-            }
-
-            <!-- 7. Retrieve the status of all my submitted annual and accidental leaves. -->
-            @if (activeTab == "leavestatus")
-            {
-                <section>
-                    <h2 class="text-2xl font-bold text-indigo-700 mb-6">Leave Request Status (Current Month)</h2>
-                    <p class="text-gray-600 mb-4">Showing Annual and Accidental leave requests.</p>
-
-                    @if (Model.LeaveStatuses != null && Model.LeaveStatuses.Count > 0)
-                    {
-                        <div class="bg-white rounded-xl shadow-md overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @* Loop through Model.LeaveStatuses *@
-                                    @foreach (var status in Model.LeaveStatuses)
-                                    {
-                                        var statusClass = status.FinalApprovalStatus switch
+                @if (Model.PerformanceRecords != null && Model.PerformanceRecords.Any())
+                {
+                    <table class="table table-striped table-hover shadow-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Semester</th>
+                                <th>Rating (1-5)</th>
+                                <th>Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var record in Model.PerformanceRecords)
+                            {
+                                <tr>
+                                    <td>@record.Semester</td>
+                                    <td>
+                                        @record.Rating
+                                        @if (record.Rating >= 4)
                                         {
-                                            "Approved" => "bg-green-100 text-green-800",
-                                            "Rejected" => "bg-red-100 text-red-800",
-                                            _ => "bg-yellow-100 text-yellow-800",
-                                        };
+                                            <span class="badge badge-success">Excellent</span>
+                                        }
+                                        else if (record.Rating == 3)
+                                        {
 
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">@status.RequestId</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@status.LeaveType</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@status.StartDate.ToShortDateString() - @status.EndDate.ToShortDateString()</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@status.NumDays</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full @statusClass">
-                                                    @status.FinalApprovalStatus
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                            <span class="badge badge-warning">Meets Expectation</span>
+                                        }
+                                        else
+                                        {
+
+                                            <span class="badge badge-danger">Needs Improvement</span>
+                                        }
+                                    </td>
+                                    <td>@record.Comments</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No performance records found.</p>
+                }
+            </div>
+
+            <!-- 3. Attendance Tab (Req 3) -->
+            <div class="tab-pane fade @(activeTab == "attendance" ? "show active" : "")" id="attendance" role="tabpanel">
+                <h4>Attendance Records for Current Month</h4>
+                <p class="text-info">Your official day off is: <strong>@employee.OfficialDayOff</strong>.</p>
+
+                @if (Model.AttendanceRecords != null && Model.AttendanceRecords.Any())
+                {
+                    <table class="table table-striped table-hover shadow-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Total Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var record in Model.AttendanceRecords.OrderByDescending(r => r.Date))
+                            {
+                                <tr>
+                                    <td>@record.Date.ToShortDateString()</td>
+                                    <td>@record.CheckInTime.ToString(@"hh\:mm")</td>
+                                    <td>@record.CheckOutTime.ToString(@"hh\:mm")</td>
+                                    <td>@record.TotalDuration.ToString(@"hh\:mm") hrs</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No attendance records found for the current month.</p>
+                }
+            </div>
+
+            <!-- 4. Payroll Tab (Req 4) -->
+            <div class="tab-pane fade @(activeTab == "payroll" ? "show active" : "")" id="payroll" role="tabpanel">
+                <h4>Last Processed Payroll Details</h4>
+                @if (Model.LastPayroll != null)
+                {
+                    <div class="card p-4 shadow-lg">
+                        <h4 class="text-primary mb-3">Net Pay: EGP @Model.LastPayroll.FinalSalaryAmount.ToString("N2")</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Payment Date:</strong> @Model.LastPayroll.PaymentDate.ToShortDateString()</p>
+                                <p><strong>Pay Period:</strong> @Model.LastPayroll.FromDate.ToShortDateString() - @Model.LastPayroll.ToDate.ToShortDateString()</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Base Salary:</strong> EGP @Model.LastPayroll.BaseSalary.ToString("N2")</p>
+                                <p class="text-success"><strong>Bonus:</strong> + EGP @Model.LastPayroll.BonusAmount.ToString("N2")</p>
+                                <p class="text-danger"><strong>Total Deductions:</strong> - EGP @Model.LastPayroll.DeductionsAmount.ToString("N2")</p>
+                            </div>
                         </div>
-                    }
-                    else
-                    {
-                        <p class="text-gray-500">No annual or accidental leave requests found for the current month.</p>
-                    }
-                </section>
-            }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No last payroll record found.</p>
+                }
+            </div>
+
+            <!-- 5. Deductions Tab (Req 5) -->
+            <div class="tab-pane fade @(activeTab == "deductions" ? "show active" : "")" id="deductions" role="tabpanel">
+                <h4>Attendance Deductions</h4>
+
+                <form method="get" class="form-inline mb-4">
+                    <input type="hidden" name="tab" value="deductions" />
+                    <div class="form-group mr-3">
+                        <label for="DeductionStartDate" class="mr-2">From Date:</label>
+                        <input type="date" class="form-control" id="DeductionStartDate" name="DeductionStartDate" value="@Model.DeductionStartDate?.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="form-group mr-3">
+                        <label for="DeductionEndDate" class="mr-2">To Date:</label>
+                        <input type="date" class="form-control" id="DeductionEndDate" name="DeductionEndDate" value="@Model.DeductionEndDate?.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Filter Deductions</button>
+                </form>
+
+                @if (Model.Deductions != null && Model.Deductions.Any())
+                {
+                    <table class="table table-striped table-hover shadow-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Attendance ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var record in Model.Deductions.OrderByDescending(r => r.Date))
+                            {
+                                <tr>
+                                    <td>@record.Date.ToShortDateString()</td>
+                                    <td>@record.Type</td>
+                                    <td><span class="text-danger">- EGP @record.Amount.ToString("N2")</span></td>
+                                    <td>@record.AttendanceID</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No deductions found for the selected period.</p>
+                }
+            </div>
+
+            <!-- 6. Annual Leave Tab (Req 6) -->
+            <div class="tab-pane fade @(activeTab == "annualleave" ? "show active" : "")" id="annualleave" role="tabpanel">
+                <h4>Apply for Annual Leave</h4>
+                <p class="mb-4">Remaining Annual Balance: <strong class="text-success">@employee.AnnualBalance days</strong></p>
+
+                <form method="post" asp-page-handler="SubmitAnnualLeave">
+                    <div class="card p-4 shadow-sm">
+                        <div class="form-group">
+                            <label asp-for="StartDate">Start Date</label>
+                            <input type="date" asp-for="StartDate" class="form-control" required min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="EndDate">End Date</label>
+                            <input type="date" asp-for="EndDate" class="form-control" required min="@Model.StartDate.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ReplacementEmpId">Replacement Employee ID (Must be a colleague)</label>
+                            <input type="number" asp-for="ReplacementEmpId" class="form-control" required placeholder="Enter colleague's Employee ID" />
+                            <span asp-validation-for="ReplacementEmpId" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success mt-3 btn-lg">Submit Leave Request</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 7. Leave Status Tab (Req 7) -->
+            <div class="tab-pane fade @(activeTab == "leavestatus" ? "show active" : "")" id="leavestatus" role="tabpanel">
+                <h4>Leave Statuses (Current Month)</h4>
+
+                @if (Model.LeaveStatuses != null && Model.LeaveStatuses.Any())
+                {
+                    <table class="table table-striped table-hover shadow-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Request ID</th>
+                                <th>Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Days</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var status in Model.LeaveStatuses.OrderByDescending(r => r.StartDate))
+                            {
+                                var statusClass = status.FinalApprovalStatus.ToLower() switch
+                                {
+                                    "approved" => "badge-success",
+                                    "rejected" => "badge-danger",
+                                    _ => "badge-warning"
+                                };
+                                <tr>
+                                    <td>@status.RequestId</td>
+                                    <td>@status.LeaveType</td>
+                                    <td>@status.StartDate.ToShortDateString()</td>
+                                    <td>@status.EndDate.ToShortDateString()</td>
+                                    <td>@status.NumDays</td>
+                                    <td><span class="badge @statusClass">@status.FinalApprovalStatus</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No leave requests found for the current month.</p>
+                }
+            </div>
 
         </div>
-    </div>
-</body>
-</html>
+    }
+</div>
+
+<!-- Bootstrap JS and dependencies (required for tabs and dismissal) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Script to ensure the correct tab remains active on page refresh/postbacks
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set min date for EndDate to match StartDate dynamically
+        const startDateInput = document.getElementById('StartDate');
+        const endDateInput = document.getElementById('EndDate');
+
+        if (startDateInput && endDateInput) {
+            // Function to update the min date for EndDate
+            const updateEndDateMin = () => {
+                endDateInput.min = startDateInput.value;
+                if (new Date(endDateInput.value) < new Date(startDateInput.value)) {
+                    // Reset EndDate if it's now before the StartDate
+                    endDateInput.value = startDateInput.value;
+                }
+            };
+
+            // Set initial min attribute
+            updateEndDateMin();
+
+            // Update on change
+            startDateInput.addEventListener('change', updateEndDateMin);
+        }
+    });
+</script>
+

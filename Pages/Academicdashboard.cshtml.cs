@@ -4,13 +4,12 @@ using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.ComponentModel.DataAnnotations; // Added for [Required]
 
 // NOTE: You must replace 'YourAppNamespace' with the actual namespace of your Razor Pages project
-namespace YourAppNamespace.Pages.Academic
+namespace Guc_Uni_System.Pages.Academic
 {
     // --- DATA MODELS (Matching Database Schema) ---
-    // These models represent the C# objects used to hold data retrieved from your SQL database.
-
     public class Employee
     {
         public int EmployeeId { get; set; }
@@ -36,7 +35,8 @@ namespace YourAppNamespace.Pages.Academic
         public DateTime Date { get; set; }
         public TimeSpan CheckInTime { get; set; }
         public TimeSpan CheckOutTime { get; set; }
-        public TimeSpan TotalDuration { get; set; } // calculated: check_out_time - check_in_time
+        // Calculated: check_out_time - check_in_time
+        public TimeSpan TotalDuration { get; set; }
     }
 
     public class PayrollRecord
@@ -68,14 +68,12 @@ namespace YourAppNamespace.Pages.Academic
         public string FinalApprovalStatus { get; set; }
     }
 
-    // --- MOCK DATA ACCESS LAYER (TO BE REPLACED) ---
-    // This class simulates the interaction with your SQL database.
-
+    // --- MOCK DATA ACCESS LAYER (TO BE REPLACED WITH ACTUAL DB LOGIC) ---
     public static class DataAccess
     {
         private static readonly List<Employee> MockEmployees = new List<Employee>
         {
-            new Employee { EmployeeId = 101, FirstName = "Jane", LastName = "Doe", AnnualBalance = 20, AccidentalBalance = 6, DepartmentName = "Media Engineering" }
+            new Employee { EmployeeId = 101, FirstName = "Jane", LastName = "Doe", AnnualBalance = 20, AccidentalBalance = 6, DepartmentName = "Media Engineering", OfficialDayOff = "Friday" }
         };
 
         // Requirement 1 / Summary
@@ -88,7 +86,7 @@ namespace YourAppNamespace.Pages.Academic
         // Requirement 2: Retrieve Performance
         public static List<PerformanceRecord> GetPerformanceRecords(int employeeId, string semesterFilter)
         {
-            // REPLACE with: SQL query to join Employee and Performance tables, filtering by emp_ID and semester
+            // REPLACE with: SQL query to join Employee and Performance tables
             var records = new List<PerformanceRecord>
             {
                 new PerformanceRecord { Semester = "W25", Rating = 5, Comments = "Outstanding research and teaching." },
@@ -108,19 +106,30 @@ namespace YourAppNamespace.Pages.Academic
         {
             // REPLACE with: SQL query to get Attendance records for the month, excluding the employee's official_day_off.
             var today = DateTime.Today;
+            var checkIn1 = new TimeSpan(9, 0, 0);
+            var checkOut1 = new TimeSpan(17, 0, 0);
+            var checkIn2 = new TimeSpan(9, 15, 0);
+            var checkOut2 = new TimeSpan(17, 30, 0);
+
             var records = new List<AttendanceRecord>
             {
-                new AttendanceRecord { Date = today.AddDays(-5), CheckInTime = new TimeSpan(9, 0, 0), CheckOutTime = new TimeSpan(17, 0, 0), TotalDuration = new TimeSpan(8, 0, 0) },
-                new AttendanceRecord { Date = today.AddDays(-4), CheckInTime = new TimeSpan(9, 15, 0), CheckOutTime = new TimeSpan(17, 30, 0), TotalDuration = new TimeSpan(8, 15, 0) },
+                // **FIXED: TotalDuration is now calculated**
+                new AttendanceRecord { Date = today.AddDays(-5), CheckInTime = checkIn1, CheckOutTime = checkOut1, TotalDuration = checkOut1 - checkIn1 },
+                new AttendanceRecord { Date = today.AddDays(-4), CheckInTime = checkIn2, CheckOutTime = checkOut2, TotalDuration = checkOut2 - checkIn2 },
                 new AttendanceRecord { Date = today.AddDays(-3), CheckInTime = new TimeSpan(10, 0, 0), CheckOutTime = new TimeSpan(18, 0, 0), TotalDuration = new TimeSpan(8, 0, 0) },
             }.Where(r => employeeId == 101).ToList();
 
-            return records;
+            // Filter by month range (since mock data uses Today, it is mostly within the current month)
+            return records.Where(r => r.Date >= monthStart && r.Date <= monthEnd).ToList();
         }
 
         // Requirement 4: Retrieve Payroll
         public static PayrollRecord GetLastMonthPayroll(int employeeId)
         {
+            // Calculate last month's start and end dates for a more realistic mock
+            var lastMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-1);
+            var lastMonthEnd = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddDays(-1);
+
             // REPLACE with: SQL query to get the last Payroll record for the employee
             return new PayrollRecord
             {
@@ -129,8 +138,9 @@ namespace YourAppNamespace.Pages.Academic
                 BonusAmount = 500.00m,
                 DeductionsAmount = 150.00m,
                 FinalSalaryAmount = 15350.00m,
-                FromDate = DateTime.Today.AddMonths(-1).Date,
-                ToDate = DateTime.Today.AddDays(-30).Date
+                // **FIXED: Corrected FromDate and ToDate for 'last month'**
+                FromDate = lastMonthStart.Date,
+                ToDate = lastMonthEnd.Date
             };
         }
 
@@ -156,7 +166,8 @@ namespace YourAppNamespace.Pages.Academic
                 throw new Exception("Replacement Employee ID cannot be your own ID.");
             }
             // Logic to insert the request goes here...
-            System.Diagnostics.Debug.WriteLine($"Annual Leave Request from {employeeId} submitted.");
+            // Note: The number of days calculation (num_days = end_date - start_date + 1) should ideally happen here or in the DB procedure.
+            System.Diagnostics.Debug.WriteLine($"Annual Leave Request from {employeeId} submitted for dates {startDate:d} to {endDate:d}");
         }
 
         // Requirement 7: Retrieve Leave Status
@@ -169,7 +180,7 @@ namespace YourAppNamespace.Pages.Academic
                 new LeaveStatus { RequestId = 202, LeaveType = "Accidental", StartDate = DateTime.Today.AddDays(5), EndDate = DateTime.Today.AddDays(5), NumDays = 1, FinalApprovalStatus = "Approved" }
             }.Where(r => employeeId == 101).ToList();
 
-            return records.Where(r => r.StartDate >= monthStart && r.EndDate <= monthEnd).ToList();
+            return records.Where(r => r.StartDate >= monthStart && r.StartDate <= monthEnd || r.EndDate >= monthStart && r.EndDate <= monthEnd).ToList();
         }
     }
 
@@ -200,12 +211,15 @@ namespace YourAppNamespace.Pages.Academic
 
         // Leave Request Inputs (Req 6)
         [BindProperty]
+        [Required] // Added validation
         public DateTime StartDate { get; set; } = DateTime.Today.AddDays(7);
 
         [BindProperty]
+        [Required] // Added validation
         public DateTime EndDate { get; set; } = DateTime.Today.AddDays(10);
 
         [BindProperty]
+        [Required] // Added validation
         public int ReplacementEmpId { get; set; }
 
         // Status Messages
@@ -268,11 +282,12 @@ namespace YourAppNamespace.Pages.Academic
 
             if (!ModelState.IsValid)
             {
-                StatusMessage = "Error: Please check the form data. All fields are required.";
+                StatusMessage = "Error: Please check the form data. All fields are required and valid.";
                 IsSuccess = false;
                 return redirectPage;
             }
 
+            // Additional validation logic
             if (StartDate > EndDate || StartDate < DateTime.Today)
             {
                 StatusMessage = "Error: Start date must be today or in the future, and cannot be after the end date.";
