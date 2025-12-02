@@ -1,0 +1,397 @@
+﻿@page
+@model Guc_Uni_System.Pages.Academic.AcademicDashboardModel
+@{
+    ViewData["Title"] = "Academic Dashboard";
+    var activeTab = Models.UniversityHrManagementSystemContext.Request.Query["tab"].ToString() ?? "summary";
+    var employee = Model.EmployeeDetails;
+}
+
+<!-- Load Bootstrap for styling (Assuming this template uses Bootstrap) -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+<style>
+    /* Custom styles for better visual appeal */
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .container {
+        max-width: 1100px;
+    }                       
+
+    .card {
+        border-radius: 0.75rem;
+        border: none;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    }
+
+    .shadow-lg {
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+    }
+
+    .nav-link.active {
+        border-color: #007bff #007bff #f8f9fa;
+        background-color: #fff;
+        color: #007bff !important;
+        font-weight: 600;
+    }
+
+    .nav-tabs .nav-link {
+        color: #495057;
+    }
+
+    .badge {
+        font-size: 0.9em;
+        padding: 0.5em 0.8em;
+    }
+</style>
+
+<div class="container py-4">
+    <h1 class="mb-4 text-primary">Academic Employee Dashboard</h1>
+
+    @if (employee == null)
+    {
+        <div class="alert alert-danger" role="alert">
+            Cannot load employee data. Please ensure you are logged in.
+        </div>
+    }
+    else
+    {
+        <h3 class="mb-4">Welcome, @employee.FirstName @employee.LastName (ID: @employee.EmployeeId)</h3>
+
+        <!-- Status Message Display (for success/error from POSTs) -->
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+                @Model.StatusMessage
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "summary" ? "active" : "")" href="?tab=summary">Summary</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "performance" ? "active" : "")" href="?tab=performance">Performance (Req 2)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "attendance" ? "active" : "")" href="?tab=attendance">Attendance (Req 3)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "payroll" ? "active" : "")" href="?tab=payroll">Payroll (Req 4)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "deductions" ? "active" : "")" href="?tab=deductions">Deductions (Req 5)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "annualleave" ? "active" : "")" href="?tab=annualleave">Annual Leave (Req 6)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "leavestatus" ? "active" : "")" href="?tab=leavestatus">Leave Status (Req 7)</a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="dashboardTabContent">
+
+            <!-- 1. Summary Tab (Req 1) -->
+            <div class="tab-pane fade @(activeTab == "summary" ? "show active" : "")" id="summary" role="tabpanel">
+                <h4>Employee Details</h4>
+                <div class="card p-4 shadow-sm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Department:</strong> @employee.DepartmentName</p>
+                            <p><strong>Official Day Off:</strong> @employee.OfficialDayOff</p>
+                            <p><strong>Email:</strong> @employee.Email</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mt-2">Leave Balances</h5>
+                            <div class="alert alert-success p-2">
+                                <strong>Annual Balance:</strong> @employee.AnnualBalance days
+                            </div>
+                            <div class="alert alert-info p-2">
+                                <strong>Accidental Balance:</strong> @employee.AccidentalBalance days
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Performance Tab (Req 2) -->
+            <div class="tab-pane fade @(activeTab == "performance" ? "show active" : "")" id="performance" role="tabpanel">
+                <h4>Performance Records</h4>
+
+                <form method="get" class="form-inline mb-4">
+                    <input type="hidden" name="tab" value="performance" />
+                    <div class="form-group mr-3">
+                        <label for="SelectedSemester" class="mr-2">Filter by Semester:</label>
+                        <input type="text" class="form-control" id="SelectedSemester" name="SelectedSemester" value="@Model.SelectedSemester" placeholder="e.g., W25" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Apply Filter</button>
+                </form>
+
+                @if (Model.PerformanceRecords != null && Model.PerformanceRecords.Any())
+                {
+                    <table class="table table-striped table-hover shadow-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Semester</th>
+                                <th>Rating (1-5)</th>
+                                <th>Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var record in Model.PerformanceRecords)
+                            {
+                                <tr>
+                                    <td>@record.Semester</td>
+                                    <td>
+                                        @record.Rating
+                                        @if (record.Rating >= 4)
+                                        {
+                                            <span class="badge badge-success">Excellent</span>
+                                        }
+                                        else if (record.Rating == 3)
+                                        {
+
+                                            <span class="badge badge-warning">Meets Expectation</span>
+                                        }
+                                        else
+                                        {
+
+                                            <span class="badge badge-danger">Needs Improvement</span>
+                                        }
+                                    </td>
+                                    <td>@record.Comments</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No performance records found.</p>
+                }
+            </div>
+
+            <!-- 3. Attendance Tab (Req 3) -->
+            <div class="tab-pane fade @(activeTab == "attendance" ? "show active" : "")" id="attendance" role="tabpanel">
+                <h4>Attendance Records for Current Month</h4>
+                <p class="text-info">Your official day off is: <strong>@employee.OfficialDayOff</strong>.</p>
+
+                @if (Model.AttendanceRecords != null && Model.AttendanceRecords.Any())
+                {
+                    <table class="table table-striped table-hover shadow-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Total Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var record in Model.AttendanceRecords.OrderByDescending(r => r.Date))
+                            {
+                                <tr>
+                                    <td>@record.Date.ToShortDateString()</td>
+                                    <td>@record.CheckInTime.ToString(@"hh\:mm")</td>
+                                    <td>@record.CheckOutTime.ToString(@"hh\:mm")</td>
+                                    <td>@record.TotalDuration.ToString(@"hh\:mm") hrs</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No attendance records found for the current month.</p>
+                }
+            </div>
+
+            <!-- 4. Payroll Tab (Req 4) -->
+            <div class="tab-pane fade @(activeTab == "payroll" ? "show active" : "")" id="payroll" role="tabpanel">
+                <h4>Last Processed Payroll Details</h4>
+                @if (Model.LastPayroll != null)
+                {
+                    <div class="card p-4 shadow-lg">
+                        <h4 class="text-primary mb-3">Net Pay: EGP @Model.LastPayroll.FinalSalaryAmount.ToString("N2")</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Payment Date:</strong> @Model.LastPayroll.PaymentDate.ToShortDateString()</p>
+                                <p><strong>Pay Period:</strong> @Model.LastPayroll.FromDate.ToShortDateString() - @Model.LastPayroll.ToDate.ToShortDateString()</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Base Salary:</strong> EGP @Model.LastPayroll.BaseSalary.ToString("N2")</p>
+                                <p class="text-success"><strong>Bonus:</strong> + EGP @Model.LastPayroll.BonusAmount.ToString("N2")</p>
+                                <p class="text-danger"><strong>Total Deductions:</strong> - EGP @Model.LastPayroll.DeductionsAmount.ToString("N2")</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No last payroll record found.</p>
+                }
+            </div>
+
+            <!-- 5. Deductions Tab (Req 5) -->
+            <div class="tab-pane fade @(activeTab == "deductions" ? "show active" : "")" id="deductions" role="tabpanel">
+                <h4>Attendance Deductions</h4>
+
+                <form method="get" class="form-inline mb-4">
+                    <input type="hidden" name="tab" value="deductions" />
+                    <div class="form-group mr-3">
+                        <label for="DeductionStartDate" class="mr-2">From Date:</label>
+                        <input type="date" class="form-control" id="DeductionStartDate" name="DeductionStartDate" value="@Model.DeductionStartDate?.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="form-group mr-3">
+                        <label for="DeductionEndDate" class="mr-2">To Date:</label>
+                        <input type="date" class="form-control" id="DeductionEndDate" name="DeductionEndDate" value="@Model.DeductionEndDate?.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Filter Deductions</button>
+                </form>
+
+                @if (Model.Deductions != null && Model.Deductions.Any())
+                {
+                    <table class="table table-striped table-hover shadow-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Attendance ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var record in Model.Deductions.OrderByDescending(r => r.Date))
+                            {
+                                <tr>
+                                    <td>@record.Date.ToShortDateString()</td>
+                                    <td>@record.Type</td>
+                                    <td><span class="text-danger">- EGP @record.Amount.ToString("N2")</span></td>
+                                    <td>@record.AttendanceID</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No deductions found for the selected period.</p>
+                }
+            </div>
+
+            <!-- 6. Annual Leave Tab (Req 6) -->
+            <div class="tab-pane fade @(activeTab == "annualleave" ? "show active" : "")" id="annualleave" role="tabpanel">
+                <h4>Apply for Annual Leave</h4>
+                <p class="mb-4">Remaining Annual Balance: <strong class="text-success">@employee.AnnualBalance days</strong></p>
+
+                <form method="post" asp-page-handler="SubmitAnnualLeave">
+                    <div class="card p-4 shadow-sm">
+                        <div class="form-group">
+                            <label asp-for="StartDate">Start Date</label>
+                            <input type="date" asp-for="StartDate" class="form-control" required min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="EndDate">End Date</label>
+                            <input type="date" asp-for="EndDate" class="form-control" required min="@Model.StartDate.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ReplacementEmpId">Replacement Employee ID (Must be a colleague)</label>
+                            <input type="number" asp-for="ReplacementEmpId" class="form-control" required placeholder="Enter colleague's Employee ID" />
+                            <span asp-validation-for="ReplacementEmpId" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success mt-3 btn-lg">Submit Leave Request</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 7. Leave Status Tab (Req 7) -->
+            <div class="tab-pane fade @(activeTab == "leavestatus" ? "show active" : "")" id="leavestatus" role="tabpanel">
+                <h4>Leave Statuses (Current Month)</h4>
+
+                @if (Model.LeaveStatuses != null && Model.LeaveStatuses.Any())
+                {
+                    <table class="table table-striped table-hover shadow-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Request ID</th>
+                                <th>Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Days</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var status in Model.LeaveStatuses.OrderByDescending(r => r.StartDate))
+                            {
+                                var statusClass = status.FinalApprovalStatus.ToLower() switch
+                                {
+                                    "approved" => "badge-success",
+                                    "rejected" => "badge-danger",
+                                    _ => "badge-warning"
+                                };
+                                <tr>
+                                    <td>@status.RequestId</td>
+                                    <td>@status.LeaveType</td>
+                                    <td>@status.StartDate.ToShortDateString()</td>
+                                    <td>@status.EndDate.ToShortDateString()</td>
+                                    <td>@status.NumDays</td>
+                                    <td><span class="badge @statusClass">@status.FinalApprovalStatus</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No leave requests found for the current month.</p>
+                }
+            </div>
+
+        </div>
+    }
+</div>
+
+<!-- Bootstrap JS and dependencies (required for tabs and dismissal) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Script to ensure the correct tab remains active on page refresh/postbacks
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set min date for EndDate to match StartDate dynamically
+        const startDateInput = document.getElementById('StartDate');
+        const endDateInput = document.getElementById('EndDate');
+
+        if (startDateInput && endDateInput) {
+            // Function to update the min date for EndDate
+            const updateEndDateMin = () => {
+                endDateInput.min = startDateInput.value;
+                if (new Date(endDateInput.value) < new Date(startDateInput.value)) {
+                    // Reset EndDate if it's now before the StartDate
+                    endDateInput.value = startDateInput.value;
+                }
+            };
+
+            // Set initial min attribute
+            updateEndDateMin();
+
+            // Update on change
+            startDateInput.addEventListener('change', updateEndDateMin);
+        }
+    });
+</script>
+
