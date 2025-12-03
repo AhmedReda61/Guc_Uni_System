@@ -15,11 +15,11 @@ namespace Guc_Uni_System.Pages.Admin
             _context = context;
         }
 
-        // Data holders
-        public List<AttendanceViewModel> AttendanceRecords { get; set; } = new List<AttendanceViewModel>();
-        public List<PerformanceViewModel> PerformanceRecords { get; set; } = new List<PerformanceViewModel>();
+        // --- Data Holders ---
+        public List<AllEmployeeAttendance> AttendanceRecords { get; set; } = new List<AllEmployeeAttendance>();
+        public List<AllPerformance> PerformanceRecords { get; set; } = new List<AllPerformance>();
 
-        // Form Inputs
+        // --- Form Inputs ---
         [BindProperty]
         public int TargetEmployeeId { get; set; }
 
@@ -32,11 +32,13 @@ namespace Guc_Uni_System.Pages.Admin
         [BindProperty]
         public DateTime ToDate { get; set; } = DateTime.Today;
 
-        // UI Messages
+        // --- UI Messages ---
         public string Message { get; set; }
         public bool IsSuccess { get; set; } = true;
 
-        public void OnGet() { }
+        public void OnGet()
+        {
+        }
 
         // 1. Fetch Yesterday's Attendance
         public void OnPostViewYesterdayAttendance()
@@ -44,10 +46,7 @@ namespace Guc_Uni_System.Pages.Admin
             try
             {
                 // 'allEmployeeAttendance' is a VIEW based on your SQL
-                AttendanceRecords = _context.Database
-                    .SqlQuery<AttendanceViewModel>($"SELECT * FROM allEmployeeAttendance")
-                    .ToList();
-
+                AttendanceRecords = _context.AllEmployeeAttendances.ToList();
                 IsSuccess = true;
                 Message = "Attendance retrieved successfully.";
             }
@@ -64,10 +63,7 @@ namespace Guc_Uni_System.Pages.Admin
             try
             {
                 // 'allPerformance' is a VIEW based on your SQL
-                PerformanceRecords = _context.Database
-                    .SqlQuery<PerformanceViewModel>($"SELECT * FROM allPerformance")
-                    .ToList();
-
+                PerformanceRecords = _context.AllPerformances.ToList();
                 IsSuccess = true;
                 Message = "Performance retrieved successfully.";
             }
@@ -87,7 +83,12 @@ namespace Guc_Uni_System.Pages.Admin
         // 4. Remove Unattended DayOff
         public IActionResult OnPostRemoveUnattendedDayOff()
         {
-            if (TargetEmployeeId <= 0) { IsSuccess = false; Message = "Invalid ID"; return Page(); }
+            if (TargetEmployeeId <= 0)
+            {
+                IsSuccess = false;
+                Message = "Invalid ID";
+                return Page();
+            }
             // Parameter name in your SQL is @employee_ID
             return ExecuteDbAction($"EXEC Remove_DayOff @employee_ID={TargetEmployeeId}", "DayOff removed.");
         }
@@ -95,7 +96,12 @@ namespace Guc_Uni_System.Pages.Admin
         // 5. Remove Approved Leaves
         public IActionResult OnPostRemoveApprovedLeaves()
         {
-            if (TargetEmployeeId <= 0) { IsSuccess = false; Message = "Invalid ID"; return Page(); }
+            if (TargetEmployeeId <= 0)
+            {
+                IsSuccess = false;
+                Message = "Invalid ID";
+                return Page();
+            }
             // Parameter name in your SQL is @employee_id
             return ExecuteDbAction($"EXEC Remove_Approved_Leaves @employee_id={TargetEmployeeId}", "Approved leaves removed.");
         }
@@ -103,7 +109,12 @@ namespace Guc_Uni_System.Pages.Admin
         // 6. Replace Employee
         public IActionResult OnPostReplaceEmployee()
         {
-            if (TargetEmployeeId <= 0 || NewEmployeeId <= 0) { IsSuccess = false; Message = "Invalid IDs"; return Page(); }
+            if (TargetEmployeeId <= 0 || NewEmployeeId <= 0)
+            {
+                IsSuccess = false;
+                Message = "Invalid IDs";
+                return Page();
+            }
 
             // Parameters match your SQL: @Emp1_ID, @Emp2_ID, @from_date, @to_date
             string sql = $"EXEC Replace_employee @Emp1_ID={TargetEmployeeId}, @Emp2_ID={NewEmployeeId}, @from_date='{FromDate:yyyy-MM-dd}', @to_date='{ToDate:yyyy-MM-dd}'";
@@ -113,11 +124,17 @@ namespace Guc_Uni_System.Pages.Admin
         // 7. Update Employment Status
         public IActionResult OnPostUpdateDailyStatus()
         {
-            if (TargetEmployeeId <= 0) { IsSuccess = false; Message = "Invalid ID"; return Page(); }
+            if (TargetEmployeeId <= 0)
+            {
+                IsSuccess = false;
+                Message = "Invalid ID";
+                return Page();
+            }
             // Parameter name in your SQL is @Employee_ID
             return ExecuteDbAction($"EXEC Update_Employment_Status @Employee_ID={TargetEmployeeId}", "Status updated.");
         }
 
+        // --- Helper Method ---
         private IActionResult ExecuteDbAction(string sql, string successMsg)
         {
             try
@@ -132,29 +149,6 @@ namespace Guc_Uni_System.Pages.Admin
                 Message = "SQL Error: " + (ex.InnerException?.Message ?? ex.Message);
             }
             return Page();
-        }
-
-        // ==========================================
-        // VIEW MODELS (Updated to match your SQL Tables)
-        // ==========================================
-        public class AttendanceViewModel
-        {
-            // Matches columns in 'Attendance' table
-            public int? emp_ID { get; set; }
-            public DateTime? date { get; set; }
-            public string? status { get; set; }
-            public TimeSpan? check_in_time { get; set; }
-            public TimeSpan? check_out_time { get; set; }
-        }
-
-        public class PerformanceViewModel
-        {
-            // Matches columns in 'Performance' table
-            public int? emp_ID { get; set; }
-            public string? semester { get; set; } // Changed from semester_code
-            public int? rating { get; set; }
-            public string? comments { get; set; }
-            // Removed course_name and missing_hours as they are not in your SQL Performance table
         }
     }
 }
