@@ -15,44 +15,41 @@ namespace Guc_Uni_System.Pages.Admin
             _context = context;
         }
 
-        // Data holders for the Views
+        // Data holders
         public List<AttendanceViewModel> AttendanceRecords { get; set; } = new List<AttendanceViewModel>();
         public List<PerformanceViewModel> PerformanceRecords { get; set; } = new List<PerformanceViewModel>();
 
-        // Inputs for Forms
+        // Form Inputs
         [BindProperty]
         public int TargetEmployeeId { get; set; }
 
         [BindProperty]
-        public int NewEmployeeId { get; set; } // For "Replace Employee"
+        public int NewEmployeeId { get; set; }
 
-        // New Inputs required by Milestone 2 Schema
         [BindProperty]
         public DateTime FromDate { get; set; } = DateTime.Today;
 
         [BindProperty]
         public DateTime ToDate { get; set; } = DateTime.Today;
 
-        // UI Feedback
+        // UI Messages
         public string Message { get; set; }
         public bool IsSuccess { get; set; } = true;
 
-        public void OnGet()
-        {
-        }
+        public void OnGet() { }
 
-        // 1. Fetch attendance records for all employees for yesterday.
-        // CORRECTED: Uses SELECT because 'allEmployeeAttendance' is a VIEW
+        // 1. Fetch Yesterday's Attendance
         public void OnPostViewYesterdayAttendance()
         {
             try
             {
+                // 'allEmployeeAttendance' is a VIEW based on your SQL
                 AttendanceRecords = _context.Database
                     .SqlQuery<AttendanceViewModel>($"SELECT * FROM allEmployeeAttendance")
                     .ToList();
 
                 IsSuccess = true;
-                Message = "Attendance for yesterday retrieved successfully.";
+                Message = "Attendance retrieved successfully.";
             }
             catch (Exception ex)
             {
@@ -61,18 +58,18 @@ namespace Guc_Uni_System.Pages.Admin
             }
         }
 
-        // 2. Fetch details for the performance of all employees in all Winter semesters.
-        // CORRECTED: Uses SELECT because 'allPerformance' is a VIEW
+        // 2. Fetch Winter Performance
         public void OnPostViewWinterPerformance()
         {
             try
             {
+                // 'allPerformance' is a VIEW based on your SQL
                 PerformanceRecords = _context.Database
                     .SqlQuery<PerformanceViewModel>($"SELECT * FROM allPerformance")
                     .ToList();
 
                 IsSuccess = true;
-                Message = "Winter performance records retrieved successfully.";
+                Message = "Performance retrieved successfully.";
             }
             catch (Exception ex)
             {
@@ -81,112 +78,83 @@ namespace Guc_Uni_System.Pages.Admin
             }
         }
 
-        // 3. Remove attendance records for all employees during official holidays
-        // CORRECTED Name: Remove_Holiday
+        // 3. Remove Holiday Attendance
         public IActionResult OnPostRemoveHolidayAttendance()
         {
             return ExecuteDbAction("EXEC Remove_Holiday", "Holiday attendance records cleaned.");
         }
 
-        // 4. Remove unattended dayoff for a certain employee (Current Month)
-        // CORRECTED Name: Remove_DayOff, Param: @Employee_id
+        // 4. Remove Unattended DayOff
         public IActionResult OnPostRemoveUnattendedDayOff()
         {
-            if (TargetEmployeeId <= 0)
-            {
-                IsSuccess = false;
-                Message = "Please enter a valid Employee ID.";
-                return Page();
-            }
-
-            return ExecuteDbAction($"EXEC Remove_DayOff @Employee_id={TargetEmployeeId}",
-                $"Unattended day-offs removed for Employee {TargetEmployeeId}.");
+            if (TargetEmployeeId <= 0) { IsSuccess = false; Message = "Invalid ID"; return Page(); }
+            // Parameter name in your SQL is @employee_ID
+            return ExecuteDbAction($"EXEC Remove_DayOff @employee_ID={TargetEmployeeId}", "DayOff removed.");
         }
 
-        // 5. Remove approved leaves for a certain employee from attendance
-        // CORRECTED Name: Remove_Approved_Leaves, Param: @Employee_id
+        // 5. Remove Approved Leaves
         public IActionResult OnPostRemoveApprovedLeaves()
         {
-            if (TargetEmployeeId <= 0)
-            {
-                IsSuccess = false;
-                Message = "Please enter a valid Employee ID.";
-                return Page();
-            }
-
-            return ExecuteDbAction($"EXEC Remove_Approved_Leaves @Employee_id={TargetEmployeeId}",
-                $"Approved leaves removed from attendance for Employee {TargetEmployeeId}.");
+            if (TargetEmployeeId <= 0) { IsSuccess = false; Message = "Invalid ID"; return Page(); }
+            // Parameter name in your SQL is @employee_id
+            return ExecuteDbAction($"EXEC Remove_Approved_Leaves @employee_id={TargetEmployeeId}", "Approved leaves removed.");
         }
 
-        // 6. Replace another employee
-        // CORRECTED Name: Replace_employee
-        // ADDED Params: @from_date, @to_date
+        // 6. Replace Employee
         public IActionResult OnPostReplaceEmployee()
         {
-            if (TargetEmployeeId <= 0 || NewEmployeeId <= 0)
-            {
-                IsSuccess = false;
-                Message = "Please enter valid IDs for both employees.";
-                return Page();
-            }
+            if (TargetEmployeeId <= 0 || NewEmployeeId <= 0) { IsSuccess = false; Message = "Invalid IDs"; return Page(); }
 
-            // Using formatted strings for dates to ensure SQL compatibility (YYYY-MM-DD)
+            // Parameters match your SQL: @Emp1_ID, @Emp2_ID, @from_date, @to_date
             string sql = $"EXEC Replace_employee @Emp1_ID={TargetEmployeeId}, @Emp2_ID={NewEmployeeId}, @from_date='{FromDate:yyyy-MM-dd}', @to_date='{ToDate:yyyy-MM-dd}'";
-
-            return ExecuteDbAction(sql, $"Employee {TargetEmployeeId} replaced by {NewEmployeeId}.");
+            return ExecuteDbAction(sql, "Employee replaced successfully.");
         }
 
-        // 7. Update employment_status daily based on leaves/active
-        // CORRECTED Name: Update_Employment_Status, Added Param: @Employee_ID
+        // 7. Update Employment Status
         public IActionResult OnPostUpdateDailyStatus()
         {
-            if (TargetEmployeeId <= 0)
-            {
-                IsSuccess = false;
-                Message = "Please enter a valid Employee ID.";
-                return Page();
-            }
-
-            return ExecuteDbAction($"EXEC Update_Employment_Status @Employee_ID={TargetEmployeeId}",
-                $"Employment status updated for Employee {TargetEmployeeId}.");
+            if (TargetEmployeeId <= 0) { IsSuccess = false; Message = "Invalid ID"; return Page(); }
+            // Parameter name in your SQL is @Employee_ID
+            return ExecuteDbAction($"EXEC Update_Employment_Status @Employee_ID={TargetEmployeeId}", "Status updated.");
         }
 
-        // Helper function
-        private IActionResult ExecuteDbAction(string sql, string successMessage)
+        private IActionResult ExecuteDbAction(string sql, string successMsg)
         {
             try
             {
                 _context.Database.ExecuteSqlRaw(sql);
                 IsSuccess = true;
-                Message = successMessage;
+                Message = successMsg;
             }
             catch (Exception ex)
             {
                 IsSuccess = false;
-                Message = "Operation failed: " + (ex.InnerException?.Message ?? ex.Message);
+                Message = "SQL Error: " + (ex.InnerException?.Message ?? ex.Message);
             }
             return Page();
         }
 
-        // View Models
+        // ==========================================
+        // VIEW MODELS (Updated to match your SQL Tables)
+        // ==========================================
         public class AttendanceViewModel
         {
-            // Ensure these match the columns in your 'allEmployeeAttendance' view
-            public int? Employee_id { get; set; } // SQL might return Employee_id (case sensitive)
-            public DateTime? start_date { get; set; } // View usually returns 'start_date' for attendance date
+            // Matches columns in 'Attendance' table
+            public int? emp_ID { get; set; }
+            public DateTime? date { get; set; }
             public string? status { get; set; }
-            public TimeSpan? start_time { get; set; } // check-in
-            public TimeSpan? end_time { get; set; }   // check-out
+            public TimeSpan? check_in_time { get; set; }
+            public TimeSpan? check_out_time { get; set; }
         }
 
         public class PerformanceViewModel
         {
-            // Ensure these match columns in 'allPerformance' view
-            public int? Employee_id { get; set; }
-            public string? semester_code { get; set; }
-            public string? course_name { get; set; }
-            public int? missing_hours { get; set; }
+            // Matches columns in 'Performance' table
+            public int? emp_ID { get; set; }
+            public string? semester { get; set; } // Changed from semester_code
             public int? rating { get; set; }
+            public string? comments { get; set; }
+            // Removed course_name and missing_hours as they are not in your SQL Performance table
         }
     }
 }
