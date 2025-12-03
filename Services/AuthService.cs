@@ -23,8 +23,6 @@ namespace Guc_Uni_System.Services
             // 2. DATABASE CHECK
             if (int.TryParse(id, out int empId))
             {
-                // Notice we include 'Roles' (or whatever the list is named in Employee.cs)
-                // CHECK YOUR Employee.cs: If the list is named 'RoleNames', change 'e.Roles' to 'e.RoleNames'
 
                 var user = _context.Employees
                     .Include(e => e.RoleNames)
@@ -32,8 +30,7 @@ namespace Guc_Uni_System.Services
 
                 if (user != null)
                 {
-                    // Now we check the Role table directly
-                    // Adjust 'RoleName' if your Role.cs property is named 'Name' or 'Title'
+
                     bool isHr = user.RoleNames.Any(r => r.RoleName.Contains("HR"));
 
                     return new UserLoginResult

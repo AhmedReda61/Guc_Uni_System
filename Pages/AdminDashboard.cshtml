@@ -27,12 +27,16 @@
                 <div class="card-body">
                     <form method="post" asp-page-handler="AddHoliday">
                         <div class="mb-2">
-                            <label>Name</label>
+                            <label>name</label>
                             <input type="text" asp-for="HolidayName" class="form-control" required />
                         </div>
                         <div class="mb-2">
-                            <label>Date</label>
-                            <input type="date" asp-for="HolidayDate" class="form-control" required />
+                            <label>From</label>
+                            <input type="date" asp-for="From" class="form-control" required />
+                        </div>
+                        <div class="mb-2">
+                            <label>To</label>
+                            <input type="date" asp-for="To" class="form-control" required />
                         </div>
                         <button class="btn btn-success w-100">Add</button>
                     </form>
@@ -50,13 +54,10 @@
                             <input type="number" asp-for="UpdateEmpId" placeholder="Emp ID" class="form-control" required />
                         </div>
                         <div class="mb-1">
-                            <input type="date" asp-for="UpdateDate" class="form-control" required />
+                            <input type="time" asp-for="check_in" class="form-control" required />
                         </div>
                         <div class="mb-2">
-                            <select asp-for="UpdateStatus" class="form-control">
-                                <option value="Present">Present</option>
-                                <option value="Absent">Absent</option>
-                            </select>
+							<input type="time" asp-for="check_out" class="form-control" required />
                         </div>
                         <button class="btn btn-warning w-100">Update</button>
                     </form>
@@ -94,28 +95,9 @@
                         <tbody>
                             @foreach (var d in Model.DeptCounts)
                             {
-                                <tr><td>@d.Name</td><td>@d.Count</td></tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- TABLE: Rejected Leaves (Req 4) -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">Rejected Leaves</div>
-                <div class="card-body">
-                    <table class="table table-sm">
-                        <thead><tr><th>ID</th><th>Date</th><th>Status</th></tr></thead>
-                        <tbody>
-                            @foreach (var l in Model.RejectedLeaves)
-                            {
                                 <tr>
-                                    <td>@l.RequestId</td>
-                                    <td>@l.StartDate</td>
-                                    <td class="text-danger">@l.FinalApprovalStatus</td>
+                                    <td>@d.Department</td>
+                                    <td>@d.NumberOfEmployees</td>
                                 </tr>
                             }
                         </tbody>
@@ -124,7 +106,44 @@
             </div>
         </div>
 
-    </div>
+        <!-- REQ #4: Rejected Medical Leaves Table -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    Rejected Medical Leaves
+                </div>
+                <div class="card-body">
+                    @if (Model.RejectedMedicalLeaves.Count == 0)
+                    {
+                        <p class="text-muted">No rejected medical leaves found.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Req ID</th>
+                                    <th>Emp ID</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var leave in Model.RejectedMedicalLeaves)
+                                {
+                                    <tr>
+                                        <td>@leave.RequestId</td>
+                                        <td>@leave.EmpId</td>
+                                        <td>@leave.DisabilityDetails</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+
+    
 
     <!-- ROW 3: Full Employee List (Req 2) -->
     <div class="card mt-4">
@@ -148,4 +167,5 @@
             </table>
         </div>
     </div>
+    
 </div>
