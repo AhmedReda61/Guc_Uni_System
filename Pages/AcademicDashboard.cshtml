@@ -1,309 +1,203 @@
 ﻿@page
-@model Guc_Uni_System.Pages.Academic.AcademicDashboardModel
+@model Guc_Uni_System.Pages.AcademicDashboardModel
 @{
     ViewData["Title"] = "Academic Employee Dashboard";
 }
 
-<!-- Load Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-    /* Custom styling for the dashboard */
-    .dashboard-container {
-        max-width: 1200px;
-    }
-
-    .nav-link {
-        @apply px-4 py-3 text-sm font-medium text-gray-500 hover:text-indigo-600 border-b-2 border-transparent transition duration-150;
-    }
-
-        .nav-link.active {
-            @apply text-indigo-700 border-indigo-700 bg-indigo-50/50;
-        }
-
-    .tab-content {
-        @apply p-6 bg-white rounded-lg shadow-inner;
-    }
-</style>
-
-<div class="dashboard-container mx-auto p-4 md:p-8 font-sans">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Academic Employee Dashboard</h1>
-
-    @* --- Status Message Display --- *@
-    @if (!string.IsNullOrEmpty(Model.StatusMessage))
-    {
-        var alertClass = Model.IsSuccess ? "bg-green-100 border-green-400 text-green-700" : "bg-red-100 border-red-400 text-red-700";
-        <div class="@alertClass border px-4 py-3 rounded relative mb-4" role="alert">
-            <span class="block sm:inline">@Model.StatusMessage</span>
-        </div>
-    }
-
-    @* --- Navigation Tabs --- *@
-    <div class="border-b border-gray-200 mb-6">
-        <nav class="flex space-x-2 overflow-x-auto">
-            <a class="nav-link @Model.GetActiveClass("summary")" asp-page="./AcademicDashboard" asp-route-tab="summary">Summary & Balances</a>
-            <a class="nav-link @Model.GetActiveClass("performance")" asp-page="./AcademicDashboard" asp-route-tab="performance">Performance Records (Req 2)</a>
-            <a class="nav-link @Model.GetActiveClass("attendance")" asp-page="./AcademicDashboard" asp-route-tab="attendance">Attendance Records (Req 3)</a>
-            <a class="nav-link @Model.GetActiveClass("payroll")" asp-page="./AcademicDashboard" asp-route-tab="payroll">Last Payroll Details (Req 4)</a>
-            <a class="nav-link @Model.GetActiveClass("deductions")" asp-page="./AcademicDashboard" asp-route-tab="deductions">Attendance Deductions (Req 5)</a>
-            <a class="nav-link @Model.GetActiveClass("annualleave")" asp-page="./AcademicDashboard" asp-route-tab="annualleave">Annual Leave Request (Req 6)</a>
-            <a class="nav-link @Model.GetActiveClass("leavestatus")" asp-page="./AcademicDashboard" asp-route-tab="leavestatus">Leave Status (Req 7)</a>
-        </nav>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <h2>Academic Employee Dashboard</h2>
+        <form method="post" asp-page-handler="Logout">
+            <button class="btn btn-danger">Logout</button>
+        </form>
     </div>
 
-    @* --- Tab Content Area --- *@
-    <div class="tab-content">
-        @* ----------------------------------------------------------------------
-           SUMMARY & BALANCES (Req 1)
-        ---------------------------------------------------------------------- *@
-        @if (Model.ActiveTab == "summary")
-        {
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Employee Summary & Balances (Req 1)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-indigo-50 p-4 rounded-lg shadow-md">
-                    <p class="text-lg font-medium text-indigo-700">Annual Leave Balance:</p>
-                    <p class="text-3xl font-bold text-indigo-900">@Model.EmployeeDetails.AnnualBalance Days</p>
-                </div>
-                <div class="bg-red-50 p-4 rounded-lg shadow-md">
-                    <p class="text-lg font-medium text-red-700">Accidental Leave Balance:</p>
-                    <p class="text-3xl font-bold text-red-900">@Model.EmployeeDetails.AccidentalBalance Days</p>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg shadow-md">
-                    <p class="text-lg font-medium text-gray-700">Official Day Off:</p>
-                    <p class="text-3xl font-bold text-gray-900">@Model.EmployeeDetails.OfficialDayOff</p>
-                </div>
-            </div>
-            <div class="mt-6 bg-white border border-gray-200 p-4 rounded-lg">
-                <p><strong>Name:</strong> @Model.EmployeeDetails.FirstName @Model.EmployeeDetails.LastName</p>
-                <p><strong>Email:</strong> @Model.EmployeeDetails.Email</p>
-                <p><strong>Department:</strong> @Model.EmployeeDetails.DepartmentName</p>
-                <p><strong>Current Salary:</strong> @Model.EmployeeDetails.Salary.ToString("C")</p>
-            </div>
-        }
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-success">@TempData["Msg"]</div>
+    }
 
-        @* ----------------------------------------------------------------------
-           PERFORMANCE RECORDS (Req 2)
-        ---------------------------------------------------------------------- *@
-        @if (Model.ActiveTab == "performance")
-        {
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Performance Records (Req 2)</h2>
-            <form method="get" class="flex space-x-4 mb-6" asp-page="./AcademicDashboard" asp-route-tab="performance">
-                <input type="hidden" name="tab" value="performance" />
-                <select name="SelectedSemester" class="form-select border rounded-lg p-2">
-                    <option value="">-- Select Semester --</option>
-                    @* Hardcoding options for mock data. In a real app, this would be dynamic. *@
-                    <option value="W25" selected="@(Model.SelectedSemester == "W25")">Winter 2025</option>
-                    <option value="S24" selected="@(Model.SelectedSemester == "S24")">Summer 2024</option>
-                    <option value="W24" selected="@(Model.SelectedSemester == "W24")">Winter 2024</option>
-                </select>
-                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">Filter</button>
-            </form>
+    <div class="row mb-4">
 
-            @if (Model.PerformanceRecords != null && Model.PerformanceRecords.Any())
-            {
-                <div class="space-y-4">
-                    @foreach (var record in Model.PerformanceRecords)
-                    {
-                        <div class="border p-4 rounded-lg shadow-sm bg-gray-50">
-                            <p class="text-lg font-bold">Semester: @record.Semester</p>
-                            <p class="text-xl mt-1">Rating: <span class="font-extrabold text-yellow-600">@record.Rating/5</span></p>
-                            <p class="mt-2 text-gray-600">Comments: @record.Comments</p>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">Apply for Annual Leave</div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="ApplyAnnualLeave">
+                        <div class="mb-2">
+                            <label>Start Date</label>
+                            <input type="date" asp-for="AnnualFrom" class="form-control" required />
                         </div>
+                        <div class="mb-2">
+                            <label>End Date</label>
+                            <input type="date" asp-for="AnnualTo" class="form-control" required />
+                        </div>
+                        <div class="mb-2">
+                            <label>Reason (Optional)</label>
+                            <input type="text" asp-for="AnnualReason" class="form-control" />
+                        </div>
+                        <button class="btn btn-success w-100">Apply</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">View Performance</div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="ViewPerformance">
+                        <div class="mb-2">
+                            <label>Semester</label>
+                            <input type="text" asp-for="PerformanceSemester" placeholder="e.g., S24, F25" class="form-control" required />
+                        </div>
+                        <button class="btn btn-primary w-100">View</button>
+                    </form>
+
+                    @if (Model.PerformanceResults.Count > 0)
+                    {
+                        <h6 class="mt-3">Results:</h6>
+                        <table class="table table-sm table-bordered">
+                            <thead><tr><th>ID</th><th>Rating</th><th>Comments</th></tr></thead>
+                            <tbody>
+                                @foreach (var p in Model.PerformanceResults)
+                                {
+                                    <tr>
+                                        <td>@p.PerformanceId</td>
+                                        <td>@p.Rating</td>
+                                        <td>@p.Comments</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     }
                 </div>
-            }
-            else
-            {
-                <p class="text-gray-500">No performance records found for the selected filter.</p>
-            }
-        }
-
-        @* ----------------------------------------------------------------------
-           ATTENDANCE RECORDS (Req 3)
-        ---------------------------------------------------------------------- *@
-        @if (Model.ActiveTab == "attendance")
-        {
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Attendance Records (Current Month) (Req 3)</h2>
-            @if (Model.AttendanceRecords != null && Model.AttendanceRecords.Any())
-            {
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check In</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check Out</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Duration</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach (var record in Model.AttendanceRecords)
-                        {
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">@record.Date.ToShortDateString()</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@record.CheckInTime.ToString(@"hh\:mm")</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@record.CheckOutTime.ToString(@"hh\:mm")</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@record.TotalDuration.ToString(@"hh\:mm")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p class="text-gray-500">No attendance records available for the current month.</p>
-            }
-        }
-
-        @* ----------------------------------------------------------------------
-           LAST PAYROLL DETAILS (Req 4)
-        ---------------------------------------------------------------------- *@
-        @if (Model.ActiveTab == "payroll")
-        {
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Last Payroll Details (Req 4)</h2>
-            @if (Model.LastPayroll != null)
-            {
-                <div class="max-w-md bg-white border border-gray-200 p-6 rounded-lg shadow-md">
-                    <p class="text-lg font-bold text-indigo-600 mb-2">Payment Date: @Model.LastPayroll.PaymentDate.ToShortDateString()</p>
-                    <p class="text-3xl font-extrabold text-green-700 mb-4">Net Salary: @Model.LastPayroll.FinalSalaryAmount.ToString("C")</p>
-                    <p><strong>Period:</strong> @Model.LastPayroll.FromDate.ToShortDateString() - @Model.LastPayroll.ToDate.ToShortDateString()</p>
-                    <ul class="mt-4 space-y-2">
-                        <li class="flex justify-between"><span>Base Salary:</span> <span class="font-medium">@Model.LastPayroll.BaseSalary.ToString("C")</span></li>
-                        <li class="flex justify-between text-green-600"><span>Bonus:</span> <span class="font-medium">+ @Model.LastPayroll.BonusAmount.ToString("C")</span></li>
-                        <li class="flex justify-between text-red-600"><span>Deductions:</span> <span class="font-medium">- @Model.LastPayroll.DeductionsAmount.ToString("C")</span></li>
-                    </ul>
-                </div>
-            }
-            else
-            {
-                <p class="text-gray-500">Last payroll details are not yet available.</p>
-            }
-        }
-
-        @* ----------------------------------------------------------------------
-           ATTENDANCE DEDUCTIONS (Req 5)
-        ---------------------------------------------------------------------- *@
-        @if (Model.ActiveTab == "deductions")
-        {
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Attendance Deductions (Req 5)</h2>
-            <form method="get" class="flex space-x-4 mb-6 items-end" asp-page="./AcademicDashboard" asp-route-tab="deductions">
-                <input type="hidden" name="tab" value="deductions" />
-                <div>
-                    <label for="DeductionStartDate" class="block text-sm font-medium text-gray-700">Start Date</label>
-                    <input type="date" id="DeductionStartDate" name="DeductionStartDate" value="@(Model.DeductionStartDate?.ToString("yyyy-MM-dd"))" class="form-input border rounded-lg p-2" required />
-                </div>
-                <div>
-                    <label for="DeductionEndDate" class="block text-sm font-medium text-gray-700">End Date</label>
-                    <input type="date" id="DeductionEndDate" name="DeductionEndDate" value="@(Model.DeductionEndDate?.ToString("yyyy-MM-dd"))" class="form-input border rounded-lg p-2" required />
-                </div>
-                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition h-10">Filter Deductions</button>
-            </form>
-
-            @if (Model.Deductions != null && Model.Deductions.Any())
-            {
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach (var deduction in Model.Deductions)
-                        {
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">@deduction.Date.ToShortDateString()</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@deduction.Type</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">@deduction.Amount.ToString("C")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p class="text-gray-500">No attendance deductions found for the selected period.</p>
-            }
-        }
-
-        @* ----------------------------------------------------------------------
-           ANNUAL LEAVE REQUEST (Req 6)
-        ---------------------------------------------------------------------- *@
-        @if (Model.ActiveTab == "annualleave")
-        {
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Apply for Annual Leave (Req 6)</h2>
-            <div class="bg-indigo-50 p-4 rounded-lg shadow-inner mb-6">
-                <p class="font-bold text-indigo-700">Available Annual Leave Balance: @Model.EmployeeDetails.AnnualBalance Days</p>
-                <p class="text-sm text-indigo-600 mt-1">Maximum request is 14 consecutive days.</p>
             </div>
+        </div>
 
-            <form method="post" asp-page-handler="SubmitAnnualLeave" class="max-w-md space-y-4">
-                <input type="hidden" name="ActiveTab" value="annualleave" />
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">View Attendance Deductions</div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="ViewDeductions">
+                        <div class="mb-1">
+                            <label>From Date</label>
+                            <input type="date" asp-for="DeductionFrom" class="form-control" required />
+                        </div>
+                        <div class="mb-2">
+                            <label>To Date</label>
+                            <input type="date" asp-for="DeductionTo" class="form-control" required />
+                        </div>
+                        <button class="btn btn-warning w-100">Fetch Deductions</button>
+                    </form>
 
-                <div>
-                    <label for="StartDate" class="block text-sm font-medium text-gray-700">Start Date</label>
-                    <input type="date" id="StartDate" name="StartDate" class="form-input mt-1 block w-full border rounded-lg p-2" required />
+                    @if (Model.DeductionResults.Count > 0)
+                    {
+                        <h6 class="mt-3">Results:</h6>
+                        <table class="table table-sm table-bordered">
+                            <thead><tr><th>Date</th><th>Amount</th><th>Type</th></tr></thead>
+                            <tbody>
+                                @foreach (var d in Model.DeductionResults)
+                                {
+                                    <tr>
+                                        <td>@d.Date.ToShortDateString()</td>
+                                        <td>@d.Amount</td>
+                                        <td>@d.Type</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div>
-                    <label for="EndDate" class="block text-sm font-medium text-gray-700">End Date</label>
-                    <input type="date" id="EndDate" name="EndDate" class="form-input mt-1 block w-full border rounded-lg p-2" required />
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">Current Month Attendance Records</div>
+                <div class="card-body">
+                    @if (Model.AttendanceRecords.Count == 0)
+                    {
+                        <p class="text-muted">No attendance records found for the current month.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-sm table-bordered">
+                            <thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead>
+                            <tbody>
+                                @foreach (var a in Model.AttendanceRecords)
+                                {
+                                    <tr>
+                                        <td>@a.Date.ToShortDateString()</td>
+                                        <td>@a.CheckIn</td>
+                                        <td>@a.CheckOut</td>
+                                        <td>@a.Status</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
                 </div>
+            </div>
+        </div>
 
-                <div>
-                    <label for="ReplacementEmpId" class="block text-sm font-medium text-gray-700">Replacement Employee ID (Mandatory)</label>
-                    <input type="number" id="ReplacementEmpId" name="ReplacementEmpId" value="@Model.ReplacementEmpId" class="form-input mt-1 block w-full border rounded-lg p-2" required placeholder="e.g., 2005" />
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-secondary text-white">Current Month Annual/Accidental Leave Status</div>
+                <div class="card-body">
+                    @if (Model.CurrentLeaves.Count == 0)
+                    {
+                        <p class="text-muted">No submitted annual or accidental leaves this month.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-sm table-bordered">
+                            <thead><tr><th>Req ID</th><th>Type</th><th>Start Date</th><th>End Date</th><th>Status</th></tr></thead>
+                            <tbody>
+                                @foreach (var l in Model.CurrentLeaves)
+                                {
+                                    <tr>
+                                        <td>@l.RequestId</td>
+                                        <td>@l.LeaveType</td>
+                                        <td>@l.StartDate.ToShortDateString()</td>
+                                        <td>@l.EndDate.ToShortDateString()</td>
+                                        <td>@l.Status</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold">Submit Annual Leave Request</button>
-            </form>
-        }
-
-        @* ----------------------------------------------------------------------
-           LEAVE STATUS (Req 7)
-        ---------------------------------------------------------------------- *@
-        @if (Model.ActiveTab == "leavestatus")
-        {
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Leave Request Status (Current Month) (Req 7)</h2>
-            @if (Model.LeaveStatuses != null && Model.LeaveStatuses.Any())
+    <div class="card mt-4">
+        <div class="card-header bg-dark text-white">Last Month Payroll Details</div>
+        <div class="card-body">
+            @if (Model.LastPayroll == null)
             {
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach (var status in Model.LeaveStatuses)
-                        {
-                            var statusColor = status.FinalApprovalStatus switch
-                            {
-                                "Approved" => "text-green-600 bg-green-50",
-                                "Rejected" => "text-red-600 bg-red-50",
-                                _ => "text-yellow-600 bg-yellow-50"
-                            };
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">@status.RequestId</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@status.LeaveType</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@status.StartDate.ToShortDateString() - @status.EndDate.ToShortDateString()</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@status.NumDays</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold">
-                                    <span class="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium @statusColor">
-                                        @status.FinalApprovalStatus
-                                    </span>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                <p class="text-muted">Last month's payroll is not yet available.</p>
             }
             else
             {
-                <p class="text-gray-500">No leave request statuses found for the current month.</p>
+                <dl class="row">
+                    <dt class="col-sm-3">Payment Date:</dt>
+                    <dd class="col-sm-9">@Model.LastPayroll.PaymentDate.ToShortDateString()</dd>
+
+                    <dt class="col-sm-3">Final Salary Amount:</dt>
+                    <dd class="col-sm-9">@Model.LastPayroll.FinalSalaryAmount.ToString("C")</dd>
+
+                    <dt class="col-sm-3">Bonus Amount:</dt>
+                    <dd class="col-sm-9">@Model.LastPayroll.BonusAmount.ToString("C")</dd>
+
+                    <dt class="col-sm-3">Deductions Amount:</dt>
+                    <dd class="col-sm-9">@Model.LastPayroll.DeductionsAmount.ToString("C")</dd>
+                </dl>
             }
-        }
+        </div>
     </div>
 </div>
