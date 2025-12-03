@@ -15,7 +15,7 @@ namespace Guc_Uni_System.Pages
             _context = context;
         }
 
-        public List<Employee> Employees { get; set; } = new List<Employee>();
+        public List<AllEmployeeProfile> Employees { get; set; } = new List<AllEmployeeProfile>();
         public List<NoEmployeeDept> DeptCounts { get; set; } = new List<NoEmployeeDept>();
         public List<AllRejectedMedical> RejectedMedicalLeaves { get; set; } = new List<AllRejectedMedical>();
 
@@ -46,7 +46,7 @@ namespace Guc_Uni_System.Pages
                 return RedirectToPage("/Login");
             }
 
-            Employees = _context.Employees.ToList();
+            Employees = _context.AllEmployeeProfiles.ToList();
 
             DeptCounts = _context.NoEmployeeDepts.ToList();
 

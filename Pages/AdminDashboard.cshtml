@@ -151,7 +151,19 @@
         <div class="card-body">
             <table class="table table-bordered">
                 <thead>
-                    <tr><th>ID</th><th>Name</th><th>Email</th><th>Dept</th></tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Years of experience</th>
+                        <th>Official dayoff</th>
+                        <th>Contract</th>
+                        <th>Status</th>
+                        <th>Annual Balance</th>
+                        <th>Accidental Balance</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach (var e in Model.Employees)
@@ -159,8 +171,15 @@
                         <tr>
                             <td>@e.EmployeeId</td>
                             <td>@e.FirstName @e.LastName</td>
+                            <td>@e.Gender</td>
                             <td>@e.Email</td>
-                            <td>@e.DeptName</td>
+                            <td>@e.Address</td>
+                            <td>@e.YearsOfExperience</td>
+                            <td>@e.OfficialDayOff</td>
+                            <td>@e.TypeOfContract</td>
+                            <td>@e.EmploymentStatus</td>
+                            <td>@e.AnnualBalance</td>
+                            <td>@e.AccidentalBalance</td>
                         </tr>
                     }
                 </tbody>

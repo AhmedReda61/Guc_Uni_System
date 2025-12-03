@@ -6,43 +6,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Guc_Uni_System.Pages
 {
-    // Placeholder models to simulate EF Core entities for required data
-    public class MyAttendanceRecord
-    {
-        public DateTime Date { get; set; }
-        public TimeSpan CheckIn { get; set; }
-        public TimeSpan CheckOut { get; set; }
-        public string Status { get; set; }
-    }
-    public class MyLastPayroll
-    {
-        public DateTime PaymentDate { get; set; }
-        public decimal FinalSalaryAmount { get; set; }
-        public decimal BonusAmount { get; set; }
-        public decimal DeductionsAmount { get; set; }
-    }
-    public class MyAnnualAccidentalLeaveStatus
-    {
-        public int RequestId { get; set; }
-        public string LeaveType { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public string Status { get; set; }
-    }
-    public class PerformanceRecord
-    {
-        public int PerformanceId { get; set; }
-        public int Rating { get; set; }
-        public string Comments { get; set; }
-    }
-    public class DeductionRecord
-    {
-        public DateTime Date { get; set; }
-        public decimal Amount { get; set; }
-        public string Type { get; set; }
-    }
-
-
     public class AcademicDashboardModel : PageModel
     {
         private readonly UniversityHrManagementSystemContext _context;
@@ -52,138 +15,235 @@ namespace Guc_Uni_System.Pages
             _context = context;
         }
 
-        // Data retrieved on page load (OnGet)
-        public MyAttendanceRecord LastPayroll { get; set; } = new MyAttendanceRecord(); // Req 4
-        public List<MyAttendanceRecord> AttendanceRecords { get; set; } = new List<MyAttendanceRecord>(); // Req 3
-        public List<MyAnnualAccidentalLeaveStatus> CurrentLeaves { get; set; } = new List<MyAnnualAccidentalLeaveStatus>(); // Req 7
+        // --- ROLE FLAGS (Control UI Visibility) ---
+        public bool IsDean { get; set; }
+        public bool IsViceDean { get; set; }
+        public bool IsPresident { get; set; }
+        public bool IsVicePresident { get; set; }
+        public bool IsHeadOfDept { get; set; } // Generic flag for any management role
 
-        // Data retrieved on form submission (OnPost)
-        public List<PerformanceRecord> PerformanceResults { get; set; } = new List<PerformanceRecord>(); // Req 2
-        public List<DeductionRecord> DeductionResults { get; set; } = new List<DeductionRecord>(); // Req 5
+        // --- FILTER INPUTS (New!) ---
+        // SupportsGet = true allows passing these in the URL (e.g., ?TargetSemester=W23)
+        [BindProperty(SupportsGet = true)]
+        public string TargetSemester { get; set; }
 
+        [BindProperty(SupportsGet = true)]
+        public int TargetMonth { get; set; } = DateTime.Now.Month; // Default to current month
 
-        // Bind Properties for Form Submissions
+        // --- DATA PROPERTIES (View Data) ---
+        public List<Performance> MyPerformances { get; set; } = new List<Performance>();
+        public List<Attendance> MyAttendances { get; set; } = new List<Attendance>();
+        public List<Payroll> MyPayrolls { get; set; } = new List<Payroll>();
+        public List<Deduction> MyDeductions { get; set; } = new List<Deduction>();
+        public List<LeaveStatusDto> MyLeavesStatus { get; set; } = new List<LeaveStatusDto>();
 
-        // Req 2: Performance
-        [BindProperty]
-        public string PerformanceSemester { get; set; }
+        // --- FORM INPUTS (BindProperty) ---
+        // Annual Leave
+        [BindProperty] public DateTime AnnualStart { get; set; }
+        [BindProperty] public DateTime AnnualEnd { get; set; }
+        [BindProperty] public int ReplacementId { get; set; }
 
-        // Req 5: Deductions
-        [BindProperty]
-        public DateTime DeductionFrom { get; set; }
+        // Accidental Leave
+        [BindProperty] public DateTime AccidentalStart { get; set; }
+        [BindProperty] public DateTime AccidentalEnd { get; set; }
 
-        [BindProperty]
-        public DateTime DeductionTo { get; set; }
+        // Medical Leave
+        [BindProperty] public DateTime MedicalStart { get; set; }
+        [BindProperty] public DateTime MedicalEnd { get; set; }
+        [BindProperty] public string MedicalType { get; set; } // 'sick' or 'maternity'
+        [BindProperty] public bool InsuranceStatus { get; set; }
+        [BindProperty] public string DisabilityDetails { get; set; }
+        [BindProperty] public string MedicalDocDesc { get; set; }
+        [BindProperty] public string MedicalFileName { get; set; }
 
-        // Req 6: Annual Leave
-        [BindProperty]
-        [Required(ErrorMessage = "Start Date is required.")]
-        public DateTime AnnualFrom { get; set; }
+        // Unpaid Leave
+        [BindProperty] public DateTime UnpaidStart { get; set; }
+        [BindProperty] public DateTime UnpaidEnd { get; set; }
+        [BindProperty] public string UnpaidDocDesc { get; set; }
+        [BindProperty] public string UnpaidFileName { get; set; }
 
-        [BindProperty]
-        [Required(ErrorMessage = "End Date is required.")]
-        public DateTime AnnualTo { get; set; }
+        // Compensation Leave
+        [BindProperty] public DateTime CompDate { get; set; }
+        [BindProperty] public DateTime CompOriginalDate { get; set; }
+        [BindProperty] public string CompReason { get; set; }
+        [BindProperty] public int CompReplacementId { get; set; }
 
-        [BindProperty]
-        public string AnnualReason { get; set; }
+        // Management (Dean/Prez) Inputs
+        [BindProperty] public int ManageRequestId { get; set; }
+        [BindProperty] public int ManageReplacementId { get; set; } // For Annual approval
+        [BindProperty] public int EvalEmpId { get; set; }
+        [BindProperty] public int EvalRating { get; set; }
+        [BindProperty] public string EvalComment { get; set; }
+        [BindProperty] public string EvalSemester { get; set; }
 
 
         public IActionResult OnGet()
         {
-            // 1. Security Check (Are they an Academic Employee?)
-            string role = HttpContext.Session.GetString("user_role");
-            string empIdString = HttpContext.Session.GetString("user_id");
-
-            if (role != "Academic Employee" || string.IsNullOrEmpty(empIdString))
-            {
+            var role = HttpContext.Session.GetString("user_role");
+            if (role != "Academic")
                 return RedirectToPage("/Login");
-            }
-            int empId = int.Parse(empIdString);
 
-            // 3. Retrieve attendance records for the current month
-            // Assuming there is a function/view 'View_My_Attendance_Current_Month' that takes empId
-            // Using ExecuteSqlRaw to simulate calling a function or a view dynamically
-            AttendanceRecords = _context.MyAttendanceRecords.FromSqlRaw("SELECT * FROM View_My_Attendance_Current_Month({0})", empId).ToList();
-
-            // 4. Retrieve last month's payroll details
-            // Assuming 'View_My_Last_Payroll' is a view/function
-            LastPayroll = _context.MyLastPayrolls.FromSqlRaw("SELECT * FROM View_My_Last_Payroll({0})", empId).FirstOrDefault();
-
-            // 7. Retrieve the status of annual/accidental leaves during the current month
-            // Assuming 'View_My_Current_Annual_Accidental_Leaves' is a view/function
-            CurrentLeaves = _context.MyAnnualAccidentalLeaveStatuses.FromSqlRaw("SELECT * FROM View_My_Current_Annual_Accidental_Leaves({0})", empId).ToList();
+            int myId = HttpContext.Session.GetInt32("user_id").GetValueOrDefault();
 
 
-            // Check if there are any results from a previous OnPost (Req 2 or 5)
-            // Storing results in TempData is a common pattern for Post/Redirect/Get (PRG)
-            if (TempData.ContainsKey("PerformanceResults"))
+            // --- 1. DETECT SPECIFIC ROLES (FIXED) ---
+            // We fetch the Employee and INCLUDE the 'RoleNames' list
+            var employee = _context.Employees
+                .Include(e => e.RoleNames) // Loads the linked Roles
+                .FirstOrDefault(e => e.EmployeeId == myId);
+
+            if (employee != null && employee.RoleNames != null)
             {
-                PerformanceResults = (List<PerformanceRecord>)TempData["PerformanceResults"];
+                var myRoleStrings = employee.RoleNames.Select(r => r.RoleName).ToList();
+
+                IsDean = myRoleStrings.Contains("Dean");
+                IsViceDean = myRoleStrings.Contains("Vice Dean");
+                IsPresident = myRoleStrings.Contains("President");
+                IsVicePresident = myRoleStrings.Contains("Vice President");
             }
-            if (TempData.ContainsKey("DeductionResults"))
+
+            // Flag to show the Management Tab
+            IsHeadOfDept = IsDean || IsViceDean || IsPresident || IsVicePresident;
+
+            // 1. My Performance
+            try
             {
-                DeductionResults = (List<DeductionRecord>)TempData["DeductionResults"];
+                MyPerformances = _context.Performances
+                    .FromSqlRaw("SELECT * FROM dbo.MyPerformance({0}, {1})", myId, TargetSemester) // Hardcoding semester or make it dynamic
+                    .ToList();
             }
+            catch { }
+
+            // 2. My Attendance (Current Month)
+            try
+            {
+                MyAttendances = _context.Attendances
+                    .FromSqlRaw("SELECT * FROM dbo.MyAttendance({0})", myId)
+                    .ToList();
+            }
+            catch { }
+
+            // 3. Last Month Payroll
+            try
+            {
+                MyPayrolls = _context.Payrolls
+                    .FromSqlRaw("SELECT * FROM dbo.Last_month_payroll({0})", myId)
+                    .ToList();
+            }
+            catch { }
+
+            // 4. Deductions
+            try
+            {
+                // Using current month (12) as example
+                MyDeductions = _context.Deductions
+                    .FromSqlRaw("SELECT * FROM dbo.Deductions_Attendance({0}, {1})", myId, TargetMonth)
+                    .ToList();
+            }
+            catch { }
+
+            // 5. Leave Status (Custom Query because return type is not a Table Model)
+            // We use a raw query and map it manually
+            // Note: EF Core 8 can use Database.SqlQuery<T>
+            var leavesData = _context.Database.SqlQueryRaw<LeaveStatusDto>(
+                                @"SELECT 
+                                    request_ID AS RequestId, 
+                                    date_of_request AS DateOfRequest, 
+                                    final_approval_status AS Status 
+                                    FROM dbo.status_leaves({0})",
+                                myId).ToList();
+            MyLeavesStatus = leavesData;
 
             return Page();
         }
 
-        // Req 2: Handler for viewing performance
-        public IActionResult OnPostViewPerformance()
+        // --- ACTION HANDLERS ---
+
+        // Part 1.6: Annual Leave
+        public IActionResult OnPostApplyAnnual()
         {
-            string empIdString = HttpContext.Session.GetString("user_id");
-            if (string.IsNullOrEmpty(empIdString)) return RedirectToPage("/Login");
-            int empId = int.Parse(empIdString);
+            int myId = HttpContext.Session.GetInt32("user_id").Value;
+            _context.Database.ExecuteSqlRaw("EXEC Submit_annual @employee_ID={0}, @replacement_emp={1}, @start_date={2}, @end_date={3}",
+                myId, ReplacementId, AnnualStart, AnnualEnd);
 
-            // Assuming a stored function/view 'View_My_Performance' that returns performance records
-            var results = _context.PerformanceRecords
-                .FromSqlRaw("SELECT * FROM View_My_Performance @emp_id={0}, @semester={1}", empId, PerformanceSemester)
-                .ToList();
-
-            // Use TempData to pass the results back to OnGet after redirect
-            TempData["PerformanceResults"] = results;
-            TempData["Msg"] = $"Performance for semester '{PerformanceSemester}' retrieved.";
+            TempData["Msg"] = "Annual Leave Submitted!";
             return RedirectToPage();
         }
 
-        // Req 5: Handler for fetching deductions
-        public IActionResult OnPostViewDeductions()
+        // Part 2.1: Accidental Leave
+        public IActionResult OnPostApplyAccidental()
         {
-            string empIdString = HttpContext.Session.GetString("user_id");
-            if (string.IsNullOrEmpty(empIdString)) return RedirectToPage("/Login");
-            int empId = int.Parse(empIdString);
+            int myId = HttpContext.Session.GetInt32("user_id").Value;
+            _context.Database.ExecuteSqlRaw("EXEC Submit_accidental @employee_ID={0}, @start_date={1}, @end_date={2}",
+                myId, AccidentalStart, AccidentalEnd);
 
-            // Assuming a stored function/view 'Get_Attendance_Deductions'
-            var results = _context.DeductionRecords
-                .FromSqlRaw("SELECT * FROM Get_Attendance_Deductions @emp_id={0}, @from_date={1}, @to_date={2}",
-                    empId, DeductionFrom, DeductionTo)
-                .ToList();
-
-            // Use TempData to pass the results back to OnGet after redirect
-            TempData["DeductionResults"] = results;
-            TempData["Msg"] = "Deductions retrieved for the specified period.";
+            TempData["Msg"] = "Accidental Leave Submitted!";
             return RedirectToPage();
         }
 
-        // Req 6: Handler for applying annual leave
-        public IActionResult OnPostApplyAnnualLeave()
+        // Part 2.2: Medical Leave
+        public IActionResult OnPostApplyMedical()
         {
-            if (!ModelState.IsValid)
-            {
-                // Re-fetch OnGet data if form validation fails (not necessary for this mock, but good practice)
-                return OnGet();
-            }
+            int myId = HttpContext.Session.GetInt32("user_id").Value;
+            _context.Database.ExecuteSqlRaw("EXEC Submit_medical @employee_ID={0}, @start_date={1}, @end_date={2}, @medical_type={3}, @insurance_status={4}, @disability_details={5}, @document_description={6}, @file_name={7}",
+                myId, MedicalStart, MedicalEnd, MedicalType, InsuranceStatus, DisabilityDetails, MedicalDocDesc, MedicalFileName);
 
-            string empIdString = HttpContext.Session.GetString("user_id");
-            if (string.IsNullOrEmpty(empIdString)) return RedirectToPage("/Login");
-            int empId = int.Parse(empIdString);
+            TempData["Msg"] = "Medical Leave Submitted!";
+            return RedirectToPage();
+        }
 
-            // Assuming a stored procedure 'Apply_Annual_Leave' exists
-            // Reason is optional in the DB but included here for completeness
-            _context.Database.ExecuteSqlRaw("EXEC Apply_Annual_Leave @emp_id={0}, @start_date={1}, @end_date={2}, @reason={3}",
-                empId, AnnualFrom, AnnualTo, AnnualReason ?? (object)DBNull.Value);
+        // Part 2.3: Unpaid Leave
+        public IActionResult OnPostApplyUnpaid()
+        {
+            int myId = HttpContext.Session.GetInt32("user_id").Value;
+            _context.Database.ExecuteSqlRaw("EXEC Submit_unpaid @employee_ID={0}, @start_date={1}, @end_date={2}, @document_description={3}, @file_name={4}",
+                myId, UnpaidStart, UnpaidEnd, UnpaidDocDesc, UnpaidFileName);
 
-            TempData["Msg"] = "Annual Leave Application Submitted!";
+            TempData["Msg"] = "Unpaid Leave Submitted!";
+            return RedirectToPage();
+        }
+
+        // Part 2.4: Compensation Leave
+        public IActionResult OnPostApplyComp()
+        {
+            int myId = HttpContext.Session.GetInt32("user_id").Value;
+            _context.Database.ExecuteSqlRaw("EXEC Submit_compensation @employee_ID={0}, @compensation_date={1}, @reason={2}, @date_of_original_workday={3}, @rep_emp_id={4}",
+                myId, CompDate, CompReason, CompOriginalDate, CompReplacementId);
+
+            TempData["Msg"] = "Compensation Leave Submitted!";
+            return RedirectToPage();
+        }
+
+        // Part 2.5: Approve Unpaid (Dean/Prez)
+        public IActionResult OnPostApproveUnpaid()
+        {
+            int myId = HttpContext.Session.GetInt32("user_id").Value;
+            _context.Database.ExecuteSqlRaw("EXEC Upperboard_approve_unpaids @request_ID={0}, @upperboard_ID={1}",
+                ManageRequestId, myId);
+
+            TempData["Msg"] = "Unpaid Leave Processed (if authorized)";
+            return RedirectToPage();
+        }
+
+        // Part 2.6: Approve Annual (Dean/Prez)
+        public IActionResult OnPostApproveAnnual()
+        {
+            int myId = HttpContext.Session.GetInt32("user_id").Value;
+            _context.Database.ExecuteSqlRaw("EXEC Upperboard_approve_annual @request_ID={0}, @Upperboard_ID={1}, @replacement_ID={2}",
+                ManageRequestId, myId, ManageReplacementId);
+
+            TempData["Msg"] = "Annual Leave Processed (if authorized)";
+            return RedirectToPage();
+        }
+
+        // Part 2.7: Evaluation (Dean)
+        public IActionResult OnPostEvaluate()
+        {
+            int myId = HttpContext.Session.GetInt32("user_id").Value;
+            _context.Database.ExecuteSqlRaw("EXEC Dean_andHR_Evaluation @employee_ID={0}, @rating={1}, @comment={2}, @semester={3}",
+                EvalEmpId, EvalRating, EvalComment, EvalSemester);
+
+            TempData["Msg"] = "Evaluation Submitted!";
             return RedirectToPage();
         }
 
@@ -192,5 +252,14 @@ namespace Guc_Uni_System.Pages
             HttpContext.Session.Clear();
             return RedirectToPage("/Login");
         }
+
+        // Helper class for Requirement 7 (View Leave Status)
+        public class LeaveStatusDto
+        {
+            public int RequestId { get; set; }
+            public DateTime DateOfRequest { get; set; }
+            public string Status { get; set; }
+        }
+
     }
 }
