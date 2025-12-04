@@ -23,7 +23,7 @@ namespace Guc_Uni_System.Pages
             {
                 HttpContext.Session.SetInt32("user_id", 0);
                 HttpContext.Session.SetString("user_role", "Admin");
-                return RedirectToPage("/AdminDashboard");
+                return RedirectToPage("/Admin/AdminDashboard");
             }
             if (id == "e" && password == "e")
             {
