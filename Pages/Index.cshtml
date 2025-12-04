@@ -4,7 +4,35 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mt-5">
+    <h1 class="display-4 fw-bold text-primary">University HR System</h1>
+    <p class="lead text-muted mb-5">Welcome to the GUC Database Management Portal.</p>
+
+    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+
+        <!-- Button 1: Go to Login -->
+        <a asp-page="/Login" class="btn btn-primary btn-lg px-4 gap-3">
+            Login
+        </a>
+
+        <!-- Button 2: Go to All Data Viewer -->
+        <a asp-page="/all" class="btn btn-outline-secondary btn-lg px-4">
+            View All Data (Admin)
+        </a>
+
+    </div>
+
+    <hr class="my-5 w-50 mx-auto" />
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-start">
+            <h5>System Features:</h5>
+            <ul>
+                <li>Admin Dashboard for System Management</li>
+                <li>HR Payroll & Deduction Handling</li>
+                <li>Academic Employee Leave Requests</li>
+                <li>Dean & President Approval Workflows</li>
+            </ul>
+        </div>
+    </div>
 </div>

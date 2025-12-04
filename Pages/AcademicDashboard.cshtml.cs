@@ -109,7 +109,7 @@ namespace Guc_Uni_System.Pages
             try
             {
                 MyPerformances = _context.Performances
-                    .FromSqlRaw("SELECT * FROM dbo.MyPerformance({0}, {1})", myId, TargetSemester) // Hardcoding semester or make it dynamic
+                    .FromSqlRaw("SELECT * FROM dbo.MyPerformance({0}, {1})", myId, TargetSemester)
                     .ToList();
             }
             catch { }
