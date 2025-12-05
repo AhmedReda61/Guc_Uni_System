@@ -98,17 +98,15 @@ namespace Guc_Uni_System.Pages
             // 2. Fetch Data Views (Using your original FromSqlRaw logic)
             try
             {
-                if (!string.IsNullOrEmpty(TargetSemester))
-                {
-                    MyPerformances = _context.Performances
-                        .FromSqlRaw("SELECT * FROM dbo.MyPerformance({0}, {1})", myId, TargetSemester)
-                        .ToList();
-                }
-                else
-                {
-                    // Logic if no semester selected (optional: fetch all or empty)
-                }
+                MyPerformances = _context.Performances
+                    .FromSqlRaw("SELECT * FROM dbo.MyPerformance({0}, {1})", myId, TargetSemester) // Hardcoding semester or make it dynamic
+                    .ToList();
+            }
+            catch { }
 
+            // 2. My Attendance (Current Month)
+            try
+            {
                 MyAttendances = _context.Attendances
                     .FromSqlRaw("SELECT * FROM dbo.MyAttendance({0})", myId)
                     .ToList();
