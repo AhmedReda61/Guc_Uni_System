@@ -246,7 +246,7 @@ namespace Guc_Uni_System.Pages
         public class LeaveStatusDto
         {
             public int RequestId { get; set; }
-            public DateTime DateOfRequest { get; set; }
+            public DateOnly DateOfRequest { get; set; }
             public string Status { get; set; }
         }
 

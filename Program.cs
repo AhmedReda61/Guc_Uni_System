@@ -7,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
+// 1. ADD THIS LINE TO FIX THE ERROR
+builder.Services.AddHttpContextAccessor();
+
 // 1. Add Session
 builder.Services.AddSession(options => {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
