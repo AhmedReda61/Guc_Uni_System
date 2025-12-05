@@ -15,29 +15,35 @@ namespace Guc_Uni_System.Pages
         }
 
         public Employee CurrentEmployee { get; set; }
-        public string DepartmentName { get; set; }
-        public string RoleName { get; set; }
+        public string DashboardUrl { get; set; } // Dynamic Back Link
 
         public IActionResult OnGet()
         {
-            // 1. Get User ID from Session
-            // Note: Ensure your Login page sets "user_id"
+            // 1. Check Role
+            string role = HttpContext.Session.GetString("user_role");
+            if (string.IsNullOrEmpty(role)) return RedirectToPage("/Login");
+
+            // 2. Set Back Button Destination
+            if (role == "Admin")
+            {
+                DashboardUrl = "/Admin/AdminDashboard";
+                // Admin doesn't have a profile in DB, but we prevent crash if they type URL
+                CurrentEmployee = new Employee { FirstName = "Admin", LastName = "User", Email = "admin@system.local", EmploymentStatus = "System", DeptName = "IT" };
+                return Page();
+            }
+            else
+            {
+                DashboardUrl = "/AcademicDashboard"; // Academic Employee
+            }
+
+            // 3. Fetch Real Employee Data
             int? userId = HttpContext.Session.GetInt32("user_id");
-
-            // FALLBACK FOR TESTING (Remove this in production)
-            if (userId == null) userId = 1;
-
             if (userId == null) return RedirectToPage("/Login");
 
-            // 2. Fetch Employee Details
             CurrentEmployee = _context.Employees
                 .FirstOrDefault(e => e.EmployeeId == userId);
 
             if (CurrentEmployee == null) return RedirectToPage("/Login");
-
-            // 3. Fetch Extra Info (Dept & Role) logic if needed
-            // Assuming Department is directly in Employee table or View
-            // If you used the View 'AllEmployeeProfile', you could fetch from there too.
 
             return Page();
         }

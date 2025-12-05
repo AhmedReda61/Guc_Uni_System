@@ -1,0 +1,324 @@
+﻿@page
+@model Guc_Uni_System.Pages.AcademicDashboardModel
+@{
+    ViewData["Title"] = "Academic Dashboard";
+}
+
+<div class="container-fluid mt-3">
+    <div class="d-flex justify-content-between mb-3">
+        <h2>Academic Employee Dashboard</h2>
+        <form method="post" asp-page-handler="Logout">
+            <button class="btn btn-danger">Logout</button>
+        </form>
+    </div>
+
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-info">@TempData["Msg"]</div>
+    }
+
+    <!-- TABS NAVIGATION -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button">My Info</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="apply-tab" data-bs-toggle="tab" data-bs-target="#apply" type="button">Apply for Leaves</button>
+        </li>
+
+        <!-- LOGIC: Only show this tab if user has ANY management role -->
+        @if (Model.IsHeadOfDept)
+        {
+            <li class="nav-item">
+                <button class="nav-link" id="manage-tab" data-bs-toggle="tab" data-bs-target="#manage" type="button">Management</button>
+            </li>
+        }
+    </ul>
+
+    <!-- TABS CONTENT -->
+    <div class="tab-content pt-3" id="myTabContent">
+
+        <!-- TAB 1: MY INFO -->
+        <div class="tab-pane fade show active" id="info">
+            <div class="row">
+                <!-- Payroll -->
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">Last Payroll</div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <thead><tr><th>Date</th><th>Amount</th><th>Bonus</th><th>Deductions</th></tr></thead>
+                                <tbody>
+                                    @foreach (var p in Model.MyPayrolls)
+                                    {
+                                        <tr><td>@p.PaymentDate</td><td>@p.FinalSalaryAmount</td><td>@p.BonusAmount</td><td>@p.DeductionsAmount</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- Leave Status -->
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">My Leave Status (Current Month)</div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <thead><tr><th>Req ID</th><th>Date</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    @foreach (var l in Model.MyLeavesStatus)
+                                    {
+                                        <tr><td>@l.RequestId</td><td>@l.DateOfRequest</td><td>@l.Status</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- Attendance -->
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">My Attendance</div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <thead><tr><th>Date</th><th>In</th><th>Out</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    @foreach (var a in Model.MyAttendances)
+                                    {
+                                        <tr><td>@a.Date</td><td>@a.CheckInTime</td><td>@a.CheckOutTime</td><td>@a.Status</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- Performance (With Semester Filter) -->
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-warning">Performance</div>
+                        <div class="card-body">
+                            <!-- Filter Form -->
+                            <form method="get" class="mb-3">
+                                <div class="input-group">
+                                    <input type="text" asp-for="TargetSemester" class="form-control" placeholder="Semester (e.g. W23)" />
+                                    <button class="btn btn-outline-dark">Filter</button>
+                                </div>
+                            </form>
+
+                            <table class="table table-sm table-striped">
+                                <thead><tr><th>Semester</th><th>Rating</th><th>Comments</th></tr></thead>
+                                <tbody>
+                                    @foreach (var p in Model.MyPerformances)
+                                    {
+                                        <tr><td>@p.Semester</td><td>@p.Rating</td><td>@p.Comments</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- Deductions (With Month Filter) -->
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-danger text-white">My Deductions</div>
+                        <div class="card-body">
+                            <!-- Filter Form -->
+                            <form method="get" class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">Month</span>
+                                    <input type="number" asp-for="TargetMonth" class="form-control" min="1" max="12" />
+                                    <button class="btn btn-outline-light bg-secondary text-white">View</button>
+                                </div>
+                            </form>
+
+                            <table class="table table-sm">
+                                <thead><tr><th>Date</th><th>Amount</th><th>Type</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    @foreach (var d in Model.MyDeductions)
+                                    {
+                                        <tr>
+                                            <td>@d.Date</td>
+                                            <td>@d.Amount</td>
+                                            <td>@d.Type</td>
+                                            <td>@d.Status</td>
+                                        </tr>
+                                    }
+                                    @if (Model.MyDeductions.Count == 0)
+                                    {
+                                        <tr><td colspan="4" class="text-center text-muted">No deductions found for this month.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: APPLY FOR LEAVES -->
+        <div class="tab-pane fade" id="apply">
+            <div class="accordion" id="leaveAccordion">
+
+                <!-- Annual Leave -->
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <h2 class="mb-0"><button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">Apply Annual Leave</button></h2>
+                    </div>
+                    <div id="collapseOne" class="collapse show" data-bs-parent="#leaveAccordion">
+                        <div class="card-body">
+                            <form method="post" asp-page-handler="ApplyAnnual">
+                                <label>Start</label><input type="date" asp-for="AnnualStart" required />
+                                <label>End</label><input type="date" asp-for="AnnualEnd" required />
+                                <label>Replacement ID</label><input type="number" asp-for="ReplacementId" required />
+                                <button class="btn btn-success btn-sm">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accidental Leave -->
+                <div class="card">
+                    <div class="card-header"><h2 class="mb-0"><button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">Apply Accidental Leave</button></h2></div>
+                    <div id="collapseTwo" class="collapse" data-bs-parent="#leaveAccordion">
+                        <div class="card-body">
+                            <form method="post" asp-page-handler="ApplyAccidental">
+                                <label>Start</label><input type="date" asp-for="AccidentalStart" required />
+                                <label>End</label><input type="date" asp-for="AccidentalEnd" required />
+                                <button class="btn btn-success btn-sm">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical Leave -->
+                <div class="card">
+                    <div class="card-header"><h2 class="mb-0"><button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">Apply Medical Leave</button></h2></div>
+                    <div id="collapseThree" class="collapse" data-bs-parent="#leaveAccordion">
+                        <div class="card-body">
+                            <form method="post" asp-page-handler="ApplyMedical">
+                                <div class="row">
+                                    <div class="col-md-3"><label>Start</label><input type="date" asp-for="MedicalStart" class="form-control" /></div>
+                                    <div class="col-md-3"><label>End</label><input type="date" asp-for="MedicalEnd" class="form-control" /></div>
+                                    <div class="col-md-3"><label>Type</label><select asp-for="MedicalType" class="form-control"><option value="sick">Sick</option><option value="maternity">Maternity</option></select></div>
+                                    <div class="col-md-3"><label>Insurance?</label><input type="checkbox" asp-for="InsuranceStatus" /></div>
+                                </div>
+                                <div class="mt-2">
+                                    <input type="text" asp-for="DisabilityDetails" placeholder="Details" class="form-control mb-1" />
+                                    <input type="text" asp-for="MedicalDocDesc" placeholder="Doc Desc" class="form-control mb-1" />
+                                    <input type="text" asp-for="MedicalFileName" placeholder="File Name" class="form-control mb-1" />
+                                    <button class="btn btn-success">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unpaid Leave -->
+                <div class="card">
+                    <div class="card-header"><h2 class="mb-0"><button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">Apply Unpaid Leave</button></h2></div>
+                    <div id="collapseFour" class="collapse" data-bs-parent="#leaveAccordion">
+                        <div class="card-body">
+                            <form method="post" asp-page-handler="ApplyUnpaid">
+                                <label>Start</label><input type="date" asp-for="UnpaidStart" />
+                                <label>End</label><input type="date" asp-for="UnpaidEnd" />
+                                <input type="text" asp-for="UnpaidDocDesc" placeholder="Doc Desc" />
+                                <input type="text" asp-for="UnpaidFileName" placeholder="File Name" />
+                                <button class="btn btn-success btn-sm">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compensation Leave -->
+                <div class="card">
+                    <div class="card-header"><h2 class="mb-0"><button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive">Apply Compensation Leave</button></h2></div>
+                    <div id="collapseFive" class="collapse" data-bs-parent="#leaveAccordion">
+                        <div class="card-body">
+                            <form method="post" asp-page-handler="ApplyComp">
+                                <label>Date Wanted</label><input type="date" asp-for="CompDate" />
+                                <label>Worked Date</label><input type="date" asp-for="CompOriginalDate" />
+                                <input type="text" asp-for="CompReason" placeholder="Reason" />
+                                <label>Replacement ID</label><input type="number" asp-for="CompReplacementId" />
+                                <button class="btn btn-success btn-sm">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- TAB 3: MANAGEMENT (Conditional Content) -->
+        @if (Model.IsHeadOfDept)
+        {
+            <div class="tab-pane fade" id="manage">
+                <div class="row">
+
+                    <!-- 1. APPROVE LEAVES (Dean, Vice Dean, President) -->
+                    <!-- Assuming all these roles can approve leaves per requirements -->
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-dark text-white">Approve Unpaid Leave</div>
+                            <div class="card-body">
+                                <form method="post" asp-page-handler="ApproveUnpaid">
+                                    <div class="input-group">
+                                        <input type="number" asp-for="ManageRequestId" class="form-control" placeholder="Request ID" required />
+                                        <button class="btn btn-primary">Process</button>
+                                    </div>
+                                    <small class="text-muted">For Deans, Vice Deans, Presidents</small>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header bg-dark text-white">Approve Annual Leave</div>
+                            <div class="card-body">
+                                <form method="post" asp-page-handler="ApproveAnnual">
+                                    <div class="mb-2"><input type="number" asp-for="ManageRequestId" class="form-control" placeholder="Request ID" required /></div>
+                                    <div class="mb-2"><input type="number" asp-for="ManageReplacementId" class="form-control" placeholder="Replacement ID" required /></div>
+                                    <button class="btn btn-primary w-100">Approve</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. EVALUATE EMPLOYEES (Dean ONLY) -->
+                    @if (Model.IsDean)
+                    {
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <strong>Dean's Evaluation</strong>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post" asp-page-handler="Evaluate">
+                                        <div class="mb-2">
+                                            <label>Employee ID</label>
+                                            <input type="number" asp-for="EvalEmpId" class="form-control" required />
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Rating (1-5)</label>
+                                            <input type="number" asp-for="EvalRating" class="form-control" min="1" max="5" required />
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Semester</label>
+                                            <input type="text" asp-for="EvalSemester" class="form-control" placeholder="e.g. W23" required />
+                                        </div>
+                                        <div class="mb-2">
+                                            <label>Comments</label>
+                                            <textarea asp-for="EvalComment" class="form-control" required></textarea>
+                                        </div>
+                                        <button class="btn btn-warning w-100">Submit Evaluation</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
