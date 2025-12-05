@@ -48,12 +48,10 @@
         }
 
         .navbar-brand {
-            /* Flex alignment for the SVG */
             display: flex;
             align-items: center;
         }
 
-        /* NEW: Controls the size of the SVG logo */
         .navbar-brand-logo {
             height: 40px;
             width: auto;
@@ -178,6 +176,13 @@
                             {
                                 dashLink = "/AcademicDashboard";
                                 dashText = "My Dashboard";
+                                dashClass = "btn-nav-highlight";
+                            }
+                            // ADDED: HR ROLE LOGIC
+                            else if (role == "HR")
+                            {
+                                dashLink = "/HRDashboard";
+                                dashText = "HR Dashboard";
                                 dashClass = "btn-nav-highlight";
                             }
                         }

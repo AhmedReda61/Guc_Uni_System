@@ -190,7 +190,14 @@
         align-items: center;
         justify-content: space-between;
         color: var(--text-primary);
+        /* UPDATED: To show it is clickable */
+        cursor: pointer;
+        user-select: none;
     }
+
+        .glass-header:hover {
+            background: rgba(255,255,255,0.05);
+        }
 
     .form-control {
         background: rgba(0, 0, 0, 0.6) !important;
@@ -205,6 +212,13 @@
             box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
         }
 
+    /* FIX: Make placeholders brighter */
+    ::placeholder {
+        color: rgba(255, 255, 255, 0.6) !important;
+        opacity: 1;
+    }
+
+    /* FIX: Doubled @@ for Razor Syntax */
     @@keyframes slideDown {
         from {
             transform: translateY(-30px);
@@ -217,6 +231,7 @@
         }
     }
 
+    /* FIX: Doubled @@ for Razor Syntax */
     @@keyframes float {
         0%, 100% {
             transform: translateY(0) rotate(15deg);
@@ -243,7 +258,6 @@
         color: #cbd5e1;
     }
 
-        /* FIX: Changed background to solid color (#050507) to prevent transparency glitch when scrolling */
         .custom-table th {
             background: #050507;
             padding: 12px;
@@ -262,7 +276,6 @@
             border-top: 1px solid var(--glass-border);
         }
 
-    /* Section Heading Style */
     h5.section-title {
         color: var(--text-secondary);
         font-size: 0.85rem;
@@ -320,10 +333,10 @@
                 </div>
                 <div class="glass-body">
                     <div class="d-flex gap-3 mb-4">
-                        <form method="post" asp-page-handler="ViewYesterdayAttendance" class="retain-scroll ajax-form">
+                        <form id="attendanceForm" method="post" asp-page-handler="ViewYesterdayAttendance" class="retain-scroll ajax-form">
                             <button class="btn btn-glassy btn-glassy-primary">Fetch Yesterday's Attendance</button>
                         </form>
-                        <form method="post" asp-page-handler="ViewWinterPerformance" class="retain-scroll ajax-form">
+                        <form id="performanceForm" method="post" asp-page-handler="ViewWinterPerformance" class="retain-scroll ajax-form">
                             <button class="btn btn-glassy">Fetch Winter Performance</button>
                         </form>
                     </div>
@@ -362,7 +375,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var e in Model.Employees) {
+                                        @foreach (var e in Model.Employees)
+                                        {
                                         <tr>
                                             <td><span class="badge bg-transparent border border-secondary text-light">@e.EmployeeId</span></td>
                                             <td>@e.FirstName @e.LastName</td>
@@ -390,9 +404,10 @@
                                 <table class="custom-table">
                                     <thead><tr><th>Department</th><th>Count</th></tr></thead>
                                     <tbody>
-                                        @foreach (var d in Model.DeptCounts) {
+                                        @foreach (var d in Model.DeptCounts)
+                                        {
                                         <tr><td>@d.Department</td><td>@d.NumberOfEmployees</td></tr>
- }
+                                        }
                                     </tbody>
                                 </table>
                             </div>
@@ -403,9 +418,10 @@
                                 <table class="custom-table">
                                     <thead><tr><th>Req ID</th><th>Emp ID</th><th>Reason</th></tr></thead>
                                     <tbody>
-                                        @foreach (var l in Model.RejectedMedicalLeaves) {
+                                        @foreach (var l in Model.RejectedMedicalLeaves)
+                                        {
                                         <tr><td>@l.RequestId</td><td>@l.EmpId</td><td>@l.DisabilityDetails</td></tr>
- }
+                                        }
                                     </tbody>
                                 </table>
                             </div>
@@ -463,14 +479,14 @@
                     <form method="post" asp-page-handler="UpdateDailyStatus" class="ajax-form mb-4">
                         <label class="text-secondary small mb-2">DAILY STATUS UPDATE</label>
                         <div class="input-group">
-                            <input type="number" asp-for="TargetEmployeeId" class="form-control" placeholder="Emp ID..." min="1" required />
+                            <input type="number" asp-for="TargetEmployeeId" class="form-control" placeholder="Emp ID..." min="1" value="" required />
                             <button class="btn btn-glassy">Update</button>
                         </div>
                     </form>
 
                     <form method="post" asp-page-handler="UpdateAttendance" class="ajax-form mb-4">
                         <label class="text-secondary small mb-2">MANUAL ATTENDANCE LOG</label>
-                        <input type="number" asp-for="TargetEmployeeId" class="form-control mb-2" placeholder="Emp ID" min="1" required />
+                        <input type="number" asp-for="TargetEmployeeId" class="form-control mb-2" placeholder="Emp ID" min="1" value="" required />
                         <div class="row g-2 mb-2">
                             <div class="col"><input type="time" asp-for="CheckIn" class="form-control" required /></div>
                             <div class="col"><input type="time" asp-for="CheckOut" class="form-control" required /></div>
@@ -483,7 +499,7 @@
                     <form method="post" class="ajax-form mb-3">
                         <label class="text-secondary small mb-2">ANOMALY FIX (REQ ID)</label>
                         <div class="input-group mb-2">
-                            <input type="number" asp-for="TargetEmployeeId" class="form-control" placeholder="Target ID..." min="1" required />
+                            <input type="number" asp-for="TargetEmployeeId" class="form-control" placeholder="Target ID..." min="1" value="" required />
                         </div>
                         <div class="d-flex gap-2">
                             <button type="submit" asp-page-handler="RemoveUnattendedDayOff" class="btn btn-glassy w-50">Remove DayOff</button>
@@ -494,8 +510,8 @@
                     <form method="post" asp-page-handler="ReplaceEmployee" class="ajax-form">
                         <label class="text-secondary small mb-2">REPLACE POSITION</label>
                         <div class="row g-2 mb-2">
-                            <div class="col"><input type="number" name="TargetEmployeeId" class="form-control" placeholder="Old ID" min="1" required  /></div>
-                            <div class="col"><input type="number" asp-for="NewEmployeeId" class="form-control" placeholder="New ID" min="1" required /></div>
+                            <div class="col"><input type="number" name="TargetEmployeeId" class="form-control" placeholder="Old ID" min="1" value="" required /></div>
+                            <div class="col"><input type="number" asp-for="NewEmployeeId" class="form-control" placeholder="New ID" min="1" value="" required /></div>
                         </div>
                         <button class="btn btn-glassy btn-glassy-primary w-100">Replace Employee</button>
                     </form>
@@ -508,18 +524,22 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
 
-        // --- TOGGLE LOGIC ---
-        const toggleButtons = document.querySelectorAll('.toggle-btn');
-        toggleButtons.forEach(btn => {
-            btn.addEventListener('click', function () {
+        // --- 1. NEW HEADER TOGGLE LOGIC ---
+        // Selecting all headers instead of just buttons
+        const headers = document.querySelectorAll('.glass-header');
+
+        headers.forEach(header => {
+            header.addEventListener('click', function () {
                 const card = this.closest('.glass-card');
                 const body = card.querySelector('.glass-body');
+                const btn = this.querySelector('.toggle-btn');
+
                 if (body.classList.contains('collapsed')) {
                     body.classList.remove('collapsed');
-                    this.innerHTML = '➖';
+                    btn.innerHTML = '➖';
                 } else {
                     body.classList.add('collapsed');
-                    this.innerHTML = '➕';
+                    btn.innerHTML = '➕';
                 }
             });
         });
@@ -529,8 +549,25 @@
         ajaxForms.forEach(form => {
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
-                const url = this.action;
 
+                // --- 2. SPECIAL LOGIC FOR FETCH BUTTONS (TOGGLE BEHAVIOR) ---
+                if (this.id === 'attendanceForm') {
+                    const container = document.getElementById('attendanceTableContainer');
+                    if (container.style.display === 'block') {
+                        container.style.display = 'none';
+                        return; // Stop here, do not fetch
+                    }
+                }
+                if (this.id === 'performanceForm') {
+                    const container = document.getElementById('performanceTableContainer');
+                    if (container.style.display === 'block') {
+                        container.style.display = 'none';
+                        return; // Stop here, do not fetch
+                    }
+                }
+                // -----------------------------------------------------------
+
+                const url = this.action;
                 let finalUrl = url;
                 if (e.submitter && e.submitter.hasAttribute('formaction')) {
                     finalUrl = e.submitter.getAttribute('formaction');
@@ -564,7 +601,7 @@
                 const date = r.date ? new Date(r.date).toLocaleDateString() : '-';
                 tbody.innerHTML += `<tr><td><span class="badge bg-transparent border border-secondary">${r.empId}</span></td><td>${date}</td><td>${r.status}</td><td>${r.checkInTime || '-'}</td><td>${r.checkOutTime || '-'}</td></tr>`;
             });
-            container.style.display = 'block';
+            container.style.display = 'block'; // Show on fetch
         }
 
         function renderPerformance(data) {
@@ -574,7 +611,7 @@
             data.forEach(r => {
                 tbody.innerHTML += `<tr><td><span class="badge bg-transparent border border-secondary">${r.empId}</span></td><td>${r.semester}</td><td style="color:#fbbf24">${r.rating} ★</td><td>${r.comments || '-'}</td></tr>`;
             });
-            container.style.display = 'block';
+            container.style.display = 'block'; // Show on fetch
         }
 
         function showToast(isSuccess, message) {

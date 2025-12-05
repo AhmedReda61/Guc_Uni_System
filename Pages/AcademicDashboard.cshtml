@@ -2,6 +2,8 @@
 @model Guc_Uni_System.Pages.AcademicDashboardModel
 @{
     ViewData["Title"] = "Academic Dashboard";
+    // Define today's date for default values
+    string today = DateTime.Now.ToString("yyyy-MM-dd");
 }
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap" rel="stylesheet">
@@ -137,6 +139,23 @@
         .form-control:focus {
             border-color: var(--accent-aqua) !important;
             box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+        }
+
+    /* FIX: Make placeholders brighter/visible */
+    ::placeholder {
+        color: rgba(255, 255, 255, 0.6) !important;
+        opacity: 1;
+    }
+
+    /* FIX: Make date calendar icon white */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+        opacity: 0.8;
+    }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
         }
 
     label {
@@ -440,9 +459,9 @@
                         <div class="accordion-body">
                             <form method="post" asp-page-handler="ApplyAnnual" class="retain-scroll">
                                 <div class="row g-3 align-items-end">
-                                    <div class="col-md-3"><label>Start</label><input type="date" asp-for="AnnualStart" class="form-control" required /></div>
-                                    <div class="col-md-3"><label>End</label><input type="date" asp-for="AnnualEnd" class="form-control" required /></div>
-                                    <div class="col-md-3"><label>Replacement ID</label><input type="number" asp-for="ReplacementId" class="form-control" required /></div>
+                                    <div class="col-md-3"><label>Start</label><input type="date" asp-for="AnnualStart" class="form-control" value="@today" required /></div>
+                                    <div class="col-md-3"><label>End</label><input type="date" asp-for="AnnualEnd" class="form-control" value="@today" required /></div>
+                                    <div class="col-md-3"><label>Replacement ID</label><input type="number" asp-for="ReplacementId" class="form-control" min="1" value="" required /></div>
                                     <div class="col-md-3"><button class="btn btn-glassy btn-glassy-primary w-100">Submit Request</button></div>
                                 </div>
                             </form>
@@ -456,8 +475,8 @@
                         <div class="accordion-body">
                             <form method="post" asp-page-handler="ApplyAccidental" class="retain-scroll">
                                 <div class="row g-3 align-items-end">
-                                    <div class="col-md-4"><label>Start</label><input type="date" asp-for="AccidentalStart" class="form-control" required /></div>
-                                    <div class="col-md-4"><label>End</label><input type="date" asp-for="AccidentalEnd" class="form-control" required /></div>
+                                    <div class="col-md-4"><label>Start</label><input type="date" asp-for="AccidentalStart" class="form-control" value="@today" required /></div>
+                                    <div class="col-md-4"><label>End</label><input type="date" asp-for="AccidentalEnd" class="form-control" value="@today" required /></div>
                                     <div class="col-md-4"><button class="btn btn-glassy btn-glassy-primary w-100">Submit</button></div>
                                 </div>
                             </form>
@@ -471,8 +490,8 @@
                         <div class="accordion-body">
                             <form method="post" asp-page-handler="ApplyMedical" class="retain-scroll">
                                 <div class="row g-3 mb-3">
-                                    <div class="col-md-3"><label>Start</label><input type="date" asp-for="MedicalStart" class="form-control" /></div>
-                                    <div class="col-md-3"><label>End</label><input type="date" asp-for="MedicalEnd" class="form-control" /></div>
+                                    <div class="col-md-3"><label>Start</label><input type="date" asp-for="MedicalStart" class="form-control" value="@today" /></div>
+                                    <div class="col-md-3"><label>End</label><input type="date" asp-for="MedicalEnd" class="form-control" value="@today" /></div>
                                     <div class="col-md-3"><label>Type</label><select asp-for="MedicalType" class="form-select"><option value="sick">Sick</option><option value="maternity">Maternity</option></select></div>
                                     <div class="col-md-3 pt-4"><div class="form-check"><input class="form-check-input" type="checkbox" asp-for="InsuranceStatus"><label class="form-check-label text-white">Insurance?</label></div></div>
                                 </div>
@@ -491,8 +510,8 @@
                         <div class="accordion-body">
                             <form method="post" asp-page-handler="ApplyUnpaid" class="retain-scroll">
                                 <div class="row g-3 mb-2">
-                                    <div class="col-md-6"><label>Start</label><input type="date" asp-for="UnpaidStart" class="form-control" /></div>
-                                    <div class="col-md-6"><label>End</label><input type="date" asp-for="UnpaidEnd" class="form-control" /></div>
+                                    <div class="col-md-6"><label>Start</label><input type="date" asp-for="UnpaidStart" class="form-control" value="@today" /></div>
+                                    <div class="col-md-6"><label>End</label><input type="date" asp-for="UnpaidEnd" class="form-control" value="@today" /></div>
                                 </div>
                                 <input type="text" asp-for="UnpaidDocDesc" placeholder="Description" class="form-control mb-2" />
                                 <input type="text" asp-for="UnpaidFileName" placeholder="File Name" class="form-control mb-3" />
@@ -508,11 +527,11 @@
                         <div class="accordion-body">
                             <form method="post" asp-page-handler="ApplyComp" class="retain-scroll">
                                 <div class="row g-3 mb-2">
-                                    <div class="col-md-6"><label>Wanted Date</label><input type="date" asp-for="CompDate" class="form-control" /></div>
-                                    <div class="col-md-6"><label>Worked Date</label><input type="date" asp-for="CompOriginalDate" class="form-control" /></div>
+                                    <div class="col-md-6"><label>Wanted Date</label><input type="date" asp-for="CompDate" class="form-control" value="@today" /></div>
+                                    <div class="col-md-6"><label>Worked Date</label><input type="date" asp-for="CompOriginalDate" class="form-control" value="@today" /></div>
                                 </div>
                                 <input type="text" asp-for="CompReason" placeholder="Reason" class="form-control mb-2" />
-                                <input type="number" asp-for="CompReplacementId" placeholder="Replacement ID" class="form-control mb-3" />
+                                <input type="number" asp-for="CompReplacementId" placeholder="Replacement ID" class="form-control mb-3" min="1" value="" />
                                 <button class="btn btn-glassy btn-glassy-primary w-100">Submit</button>
                             </form>
                         </div>
@@ -532,7 +551,7 @@
                         <div class="glass-body">
                             <form method="post" asp-page-handler="ApproveUnpaid" class="retain-scroll">
                                 <div class="input-group mb-2">
-                                    <input type="number" asp-for="ManageRequestId" class="form-control" placeholder="Request ID" required />
+                                    <input type="number" asp-for="ManageRequestId" class="form-control" placeholder="Request ID" min="1" value="" required />
                                     <button class="btn btn-glassy btn-glassy-primary">Process</button>
                                 </div>
                                 <small class="text-secondary">Authorized for: Deans, Vice Deans, Presidents</small>
@@ -546,8 +565,8 @@
                         <div class="glass-header">Approve Annual Leave</div>
                         <div class="glass-body">
                             <form method="post" asp-page-handler="ApproveAnnual" class="retain-scroll">
-                                <input type="number" asp-for="ManageRequestId" class="form-control mb-2" placeholder="Request ID" required />
-                                <input type="number" asp-for="ManageReplacementId" class="form-control mb-3" placeholder="Replacement ID" required />
+                                <input type="number" asp-for="ManageRequestId" class="form-control mb-2" placeholder="Request ID" min="1" value="" required />
+                                <input type="number" asp-for="ManageReplacementId" class="form-control mb-3" placeholder="Replacement ID" min="1" value="" required />
                                 <button class="btn btn-glassy btn-glassy-primary w-100">Approve</button>
                             </form>
                         </div>
@@ -562,8 +581,8 @@
                         <div class="glass-body">
                             <form method="post" asp-page-handler="Evaluate" class="retain-scroll">
                                 <div class="row g-3">
-                                    <div class="col-md-4"><input type="number" asp-for="EvalEmpId" class="form-control" placeholder="Employee ID" required /></div>
-                                    <div class="col-md-4"><input type="number" asp-for="EvalRating" class="form-control" placeholder="Rating (1-5)" min="1" max="5" required /></div>
+                                    <div class="col-md-4"><input type="number" asp-for="EvalEmpId" class="form-control" placeholder="Employee ID" min="1" value="" required /></div>
+                                    <div class="col-md-4"><input type="number" asp-for="EvalRating" class="form-control" placeholder="Rating (1-5)" min="1" max="5" value="" required /></div>
                                     <div class="col-md-4"><input type="text" asp-for="EvalSemester" class="form-control" placeholder="Semester (e.g. W23)" required /></div>
                                     <div class="col-12"><textarea asp-for="EvalComment" class="form-control" placeholder="Comments" rows="2" required></textarea></div>
                                     <div class="col-12"><button class="btn btn-glassy w-100" style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.5);">Submit Evaluation</button></div>
