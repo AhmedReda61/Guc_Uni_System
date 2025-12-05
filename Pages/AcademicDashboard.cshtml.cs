@@ -15,61 +15,65 @@ namespace Guc_Uni_System.Pages
             _context = context;
         }
 
-        // --- ROLE FLAGS ---
         public bool IsDean { get; set; }
         public bool IsViceDean { get; set; }
         public bool IsPresident { get; set; }
         public bool IsVicePresident { get; set; }
         public bool IsHeadOfDept { get; set; }
 
-        // --- FILTER INPUTS ---
-        [BindProperty(SupportsGet = true)]
-        public string TargetSemester { get; set; }
-
-        [BindProperty(SupportsGet = true)]
-        public int TargetMonth { get; set; } = DateTime.Now.Month;
-
-        // --- DATA PROPERTIES ---
+       
         public List<Performance> MyPerformances { get; set; } = new List<Performance>();
         public List<Attendance> MyAttendances { get; set; } = new List<Attendance>();
         public List<Payroll> MyPayrolls { get; set; } = new List<Payroll>();
         public List<Deduction> MyDeductions { get; set; } = new List<Deduction>();
         public List<LeaveStatusDto> MyLeavesStatus { get; set; } = new List<LeaveStatusDto>();
 
-        // --- FORM INPUTS ---
-        [BindProperty] public DateTime AnnualStart { get; set; } = DateTime.Today;
-        [BindProperty] public DateTime AnnualEnd { get; set; } = DateTime.Today;
+      
+        [BindProperty]
+        public string TargetSemester { get; set; }
+
+        [BindProperty]
+        public int TargetMonth { get; set; } = DateTime.Now.Month;
+
+        // Annual Leave
+        [BindProperty] public DateTime AnnualStart { get; set; }
+        [BindProperty] public DateTime AnnualEnd { get; set; }
         [BindProperty] public int ReplacementId { get; set; }
 
-        [BindProperty] public DateTime AccidentalStart { get; set; } = DateTime.Today;
-        [BindProperty] public DateTime AccidentalEnd { get; set; } = DateTime.Today;
+        // Accidental Leave
+        [BindProperty] public DateTime AccidentalStart { get; set; }
+        [BindProperty] public DateTime AccidentalEnd { get; set; }
 
-        [BindProperty] public DateTime MedicalStart { get; set; } = DateTime.Today;
-        [BindProperty] public DateTime MedicalEnd { get; set; } = DateTime.Today;
-        [BindProperty] public string MedicalType { get; set; }
+        // Medical Leave
+        [BindProperty] public DateTime MedicalStart { get; set; }
+        [BindProperty] public DateTime MedicalEnd { get; set; }
+        [BindProperty] public string MedicalType { get; set; } // 'sick' or 'maternity'
         [BindProperty] public bool InsuranceStatus { get; set; }
         [BindProperty] public string DisabilityDetails { get; set; }
         [BindProperty] public string MedicalDocDesc { get; set; }
         [BindProperty] public string MedicalFileName { get; set; }
 
-        [BindProperty] public DateTime UnpaidStart { get; set; } = DateTime.Today;
-        [BindProperty] public DateTime UnpaidEnd { get; set; } = DateTime.Today;
+        // Unpaid Leave
+        [BindProperty] public DateTime UnpaidStart { get; set; }
+        [BindProperty] public DateTime UnpaidEnd { get; set; }
         [BindProperty] public string UnpaidDocDesc { get; set; }
         [BindProperty] public string UnpaidFileName { get; set; }
 
-        [BindProperty] public DateTime CompDate { get; set; } = DateTime.Today;
-        [BindProperty] public DateTime CompOriginalDate { get; set; } = DateTime.Today;
+        // Compensation Leave
+        [BindProperty] public DateTime CompDate { get; set; }
+        [BindProperty] public DateTime CompOriginalDate { get; set; }
         [BindProperty] public string CompReason { get; set; }
         [BindProperty] public int CompReplacementId { get; set; }
 
+        // Management (Dean/Prez) Inputs
         [BindProperty] public int ManageRequestId { get; set; }
-        [BindProperty] public int ManageReplacementId { get; set; }
+        [BindProperty] public int ManageReplacementId { get; set; } // For Annual approval
         [BindProperty] public int EvalEmpId { get; set; }
         [BindProperty] public int EvalRating { get; set; }
         [BindProperty] public string EvalComment { get; set; }
         [BindProperty] public string EvalSemester { get; set; }
 
-        // --- ON GET (Restored Original Logic) ---
+
         public IActionResult OnGet()
         {
             var role = HttpContext.Session.GetString("user_role");
@@ -78,9 +82,10 @@ namespace Guc_Uni_System.Pages
 
             int myId = HttpContext.Session.GetInt32("user_id").GetValueOrDefault();
 
-            // 1. DETECT ROLES (Using your colleague's Include logic)
+
+          
             var employee = _context.Employees
-                .Include(e => e.RoleNames) // Using the navigation property
+                .Include(e => e.RoleNames)
                 .FirstOrDefault(e => e.EmployeeId == myId);
 
             if (employee != null && employee.RoleNames != null)
@@ -92,113 +97,141 @@ namespace Guc_Uni_System.Pages
                 IsPresident = myRoleStrings.Contains("President");
                 IsVicePresident = myRoleStrings.Contains("Vice President");
             }
-
             IsHeadOfDept = IsDean || IsViceDean || IsPresident || IsVicePresident;
 
-            // 2. Fetch Data Views (Using your original FromSqlRaw logic)
+            // 1.2) Performance (for Target Semester)
             try
             {
                 MyPerformances = _context.Performances
-                    .FromSqlRaw("SELECT * FROM dbo.MyPerformance({0}, {1})", myId, TargetSemester) // Hardcoding semester or make it dynamic
+                    .FromSqlRaw("SELECT * FROM dbo.MyPerformance({0}, {1})", myId, TargetSemester)
                     .ToList();
             }
             catch { }
 
-            // 2. My Attendance (Current Month)
+            // 1.3) My Attendance (Current Month)
             try
             {
                 MyAttendances = _context.Attendances
                     .FromSqlRaw("SELECT * FROM dbo.MyAttendance({0})", myId)
                     .ToList();
+            }
+            catch { }
 
+            // 1.4) Last Month Payroll
+            try
+            {
                 MyPayrolls = _context.Payrolls
                     .FromSqlRaw("SELECT * FROM dbo.Last_month_payroll({0})", myId)
                     .ToList();
+            }
+            catch { }
 
+            // 1.5). Deductions (for Target Month)
+            try
+            {
                 MyDeductions = _context.Deductions
                     .FromSqlRaw("SELECT * FROM dbo.Deductions_Attendance({0}, {1})", myId, TargetMonth)
                     .ToList();
+            }
+            catch { }
 
-                var leavesData = _context.Database.SqlQueryRaw<LeaveStatusDto>(
-                        @"SELECT 
-                            request_ID AS RequestId, 
-                            date_of_request AS DateOfRequest, 
-                            final_approval_status AS Status 
-                            FROM dbo.status_leaves({0})",
-                        myId).ToList();
-                MyLeavesStatus = leavesData;
-            }
-            catch
-            {
-                // Suppress errors for now as per instructions
-            }
+            // 1.7) Leave Status (current month)
+            var leavesData = _context.Database.SqlQueryRaw<LeaveStatusDto>(
+                                @"SELECT 
+                                    request_ID AS RequestId, 
+                                    date_of_request AS DateOfRequest, 
+                                    final_approval_status AS Status 
+                                    FROM dbo.status_leaves({0})",
+                                myId).ToList();
+            MyLeavesStatus = leavesData;
 
             return Page();
         }
 
-        // --- ACTION HANDLERS ---
-
+        //  1.6) Annual Leave
         public IActionResult OnPostApplyAnnual()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
-            ExecuteDb($"EXEC Submit_annual @employee_ID={myId}, @replacement_emp={ReplacementId}, @start_date='{AnnualStart:yyyy-MM-dd}', @end_date='{AnnualEnd:yyyy-MM-dd}'");
+            _context.Database.ExecuteSqlRaw("EXEC Submit_annual @employee_ID={0}, @replacement_emp={1}, @start_date={2}, @end_date={3}",
+                myId, ReplacementId, AnnualStart, AnnualEnd);
+
             TempData["Msg"] = "Annual Leave Submitted!";
             return RedirectToPage();
         }
 
+        //  2.1) Accidental Leave
         public IActionResult OnPostApplyAccidental()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
-            ExecuteDb($"EXEC Submit_accidental @employee_ID={myId}, @start_date='{AccidentalStart:yyyy-MM-dd}', @end_date='{AccidentalEnd:yyyy-MM-dd}'");
+            _context.Database.ExecuteSqlRaw("EXEC Submit_accidental @employee_ID={0}, @start_date={1}, @end_date={2}",
+                myId, AccidentalStart, AccidentalEnd);
+
             TempData["Msg"] = "Accidental Leave Submitted!";
             return RedirectToPage();
         }
 
+        //  2.2) Medical Leave
         public IActionResult OnPostApplyMedical()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
-            int insuranceBit = InsuranceStatus ? 1 : 0;
-            ExecuteDb($"EXEC Submit_medical @employee_ID={myId}, @start_date='{MedicalStart:yyyy-MM-dd}', @end_date='{MedicalEnd:yyyy-MM-dd}', @medical_type='{MedicalType}', @insurance_status={insuranceBit}, @disability_details='{DisabilityDetails}', @document_description='{MedicalDocDesc}', @file_name='{MedicalFileName}'");
+            _context.Database.ExecuteSqlRaw("EXEC Submit_medical @employee_ID={0}, @start_date={1}, @end_date={2}, @medical_type={3}, @insurance_status={4}, @disability_details={5}, @document_description={6}, @file_name={7}",
+                myId, MedicalStart, MedicalEnd, MedicalType, InsuranceStatus, DisabilityDetails, MedicalDocDesc, MedicalFileName);
+
             TempData["Msg"] = "Medical Leave Submitted!";
             return RedirectToPage();
         }
 
+        //  2.3) Unpaid Leave
         public IActionResult OnPostApplyUnpaid()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
-            ExecuteDb($"EXEC Submit_unpaid @employee_ID={myId}, @start_date='{UnpaidStart:yyyy-MM-dd}', @end_date='{UnpaidEnd:yyyy-MM-dd}', @document_description='{UnpaidDocDesc}', @file_name='{UnpaidFileName}'");
+            _context.Database.ExecuteSqlRaw("EXEC Submit_unpaid @employee_ID={0}, @start_date={1}, @end_date={2}, @document_description={3}, @file_name={4}",
+                myId, UnpaidStart, UnpaidEnd, UnpaidDocDesc, UnpaidFileName);
+
             TempData["Msg"] = "Unpaid Leave Submitted!";
             return RedirectToPage();
         }
 
+        //  2.4) Compensation Leave
         public IActionResult OnPostApplyComp()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
-            ExecuteDb($"EXEC Submit_compensation @employee_ID={myId}, @compensation_date='{CompDate:yyyy-MM-dd}', @reason='{CompReason}', @date_of_original_workday='{CompOriginalDate:yyyy-MM-dd}', @rep_emp_id={CompReplacementId}");
+            _context.Database.ExecuteSqlRaw("EXEC Submit_compensation @employee_ID={0}, @compensation_date={1}, @reason={2}, @date_of_original_workday={3}, @rep_emp_id={4}",
+                myId, CompDate, CompReason, CompOriginalDate, CompReplacementId);
+
             TempData["Msg"] = "Compensation Leave Submitted!";
             return RedirectToPage();
         }
 
+        //  2.5) Approve Unpaid (Dean/Prez)
         public IActionResult OnPostApproveUnpaid()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
-            ExecuteDb($"EXEC Upperboard_approve_unpaids @request_ID={ManageRequestId}, @upperboard_ID={myId}");
+            _context.Database.ExecuteSqlRaw("EXEC Upperboard_approve_unpaids @request_ID={0}, @upperboard_ID={1}",
+                ManageRequestId, myId);
+
             TempData["Msg"] = "Unpaid Leave Processed (if authorized)";
             return RedirectToPage();
         }
 
+        //  2.6) Approve Annual (Dean/Prez)
         public IActionResult OnPostApproveAnnual()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
-            ExecuteDb($"EXEC Upperboard_approve_annual @request_ID={ManageRequestId}, @Upperboard_ID={myId}, @replacement_ID={ManageReplacementId}");
+            _context.Database.ExecuteSqlRaw("EXEC Upperboard_approve_annual @request_ID={0}, @Upperboard_ID={1}, @replacement_ID={2}",
+                ManageRequestId, myId, ManageReplacementId);
+
             TempData["Msg"] = "Annual Leave Processed (if authorized)";
             return RedirectToPage();
         }
 
+        //  2.7) Evaluation (Dean)
         public IActionResult OnPostEvaluate()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
-            ExecuteDb($"EXEC Dean_andHR_Evaluation @employee_ID={EvalEmpId}, @rating={EvalRating}, @comment='{EvalComment}', @semester='{EvalSemester}'");
+            _context.Database.ExecuteSqlRaw("EXEC Dean_andHR_Evaluation @employee_ID={0}, @rating={1}, @comment={2}, @semester={3}",
+                EvalEmpId, EvalRating, EvalComment, EvalSemester);
+
             TempData["Msg"] = "Evaluation Submitted!";
             return RedirectToPage();
         }
@@ -209,17 +242,13 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage("/Login");
         }
 
-        private void ExecuteDb(string sql)
-        {
-            try { _context.Database.ExecuteSqlRaw(sql); }
-            catch { }
-        }
-
+        // (for View Leave Status)
         public class LeaveStatusDto
         {
             public int RequestId { get; set; }
             public DateTime DateOfRequest { get; set; }
             public string Status { get; set; }
         }
+
     }
 }

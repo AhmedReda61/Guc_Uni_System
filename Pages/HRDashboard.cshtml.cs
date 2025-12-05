@@ -14,8 +14,6 @@ namespace Guc_Uni_System.Pages
             _context = context;
         }
 
-        // --- INPUT PROPERTIES ---
-        // We reuse these properties for different forms to keep code clean
         [BindProperty] public int LeaveRequestId { get; set; }
 
         [BindProperty] public int EmpId { get; set; } // Used for Deductions & Payroll
@@ -26,7 +24,6 @@ namespace Guc_Uni_System.Pages
 
         public IActionResult OnGet()
         {
-            // 1. Security Check
             var role = HttpContext.Session.GetString("user_role");
             if (role != "HR")
                 return RedirectToPage("/Login");
@@ -34,9 +31,7 @@ namespace Guc_Uni_System.Pages
             return Page();
         }
 
-        // --- LEAVE APPROVAL HANDLERS ---
-
-        // Req #2: Approve Annual/Accidental
+        // 2) Approve Annual/Accidental
         public IActionResult OnPostApproveAnnualAcc()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -48,7 +43,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Req #3: Approve Unpaid
+        // 3) Approve Unpaid
         public IActionResult OnPostApproveUnpaid()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -59,7 +54,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Req #4: Approve Compensation
+        // 4) Approve Compensation
         public IActionResult OnPostApproveComp()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -70,9 +65,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // --- DEDUCTION HANDLERS ---
-
-        // Req #5: Missing Hours
+        // 5) Missing Hours
         public IActionResult OnPostAddMissingHours()
         {
             _context.Database.ExecuteSqlRaw("EXEC Deduction_hours @employee_ID={0}", EmpId);
@@ -80,7 +73,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Req #6: Missing Days
+        // 6) Missing Days
         public IActionResult OnPostAddMissingDays()
         {
             _context.Database.ExecuteSqlRaw("EXEC Deduction_days @employee_id={0}", EmpId);
@@ -88,7 +81,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Req #7: Unpaid Leave Deduction
+        // 7) Unpaid Leave Deduction
         public IActionResult OnPostAddUnpaidDeduction()
         {
             _context.Database.ExecuteSqlRaw("EXEC Deduction_unpaid @employee_ID={0}", EmpId);
@@ -96,9 +89,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // --- PAYROLL HANDLER ---
-
-        // Req #8: Generate Payroll
+        // 8) Generate Payroll
         public IActionResult OnPostGeneratePayroll()
         {
             _context.Database.ExecuteSqlRaw("EXEC Add_Payroll @employee_ID={0}, @from={1}, @to={2}",
