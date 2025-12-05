@@ -26,6 +26,9 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
 }
+app.UseStatusCodePagesWithReExecute("/NotFound");
+app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();

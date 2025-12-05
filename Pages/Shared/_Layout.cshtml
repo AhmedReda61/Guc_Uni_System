@@ -3,43 +3,204 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - GUC</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - NULL SQUAD System</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Guc_Uni_System.styles.css" asp-append-version="true" />
+
+    <style>
+        /* --- GLOBAL THEME VARIABLES --- */
+        :root {
+            --bg-color: #030305;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --accent-aqua: #06b6d4;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover-bg: rgba(255, 255, 255, 0.07);
+            --nav-glass: rgba(5, 5, 5, 0.7);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- NAVIGATION --- */
+        .navbar-glass {
+            background: var(--nav-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0.8rem 0;
+        }
+
+        .navbar-brand {
+            /* Flex alignment for the SVG */
+            display: flex;
+            align-items: center;
+        }
+
+        /* NEW: Controls the size of the SVG logo */
+        .navbar-brand-logo {
+            height: 40px;
+            width: auto;
+            display: block;
+            transition: filter 0.3s ease;
+        }
+
+        .navbar-brand:hover .navbar-brand-logo {
+            filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.5));
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            margin: 0 0.5rem;
+            border-radius: 6px;
+            padding: 0.5rem 1rem !important;
+        }
+
+            .nav-link:hover, .nav-link.active {
+                color: var(--text-primary) !important;
+                background: var(--glass-hover-bg);
+            }
+
+        /* Highlight Buttons in Nav */
+        .btn-nav-highlight {
+            border: 1px solid var(--accent-aqua);
+            color: var(--accent-aqua) !important;
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+            .btn-nav-highlight:hover {
+                background: var(--accent-aqua);
+                color: white !important;
+                box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+            }
+
+        /* --- FOOTER --- */
+        footer.footer {
+            margin-top: auto;
+            background: var(--glass-bg);
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            padding: 1.5rem 0;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        footer a {
+            color: var(--accent-aqua);
+            text-decoration: none;
+        }
+
+            footer a:hover {
+                text-decoration: underline;
+            }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-glass">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">GUC</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                <a class="navbar-brand" asp-area="" asp-page="/Index">
+                    <svg class="navbar-brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 50" preserveAspectRatio="xMinYMid meet">
+                        <defs>
+                            <linearGradient id="nullGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="squadGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#a855f7;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="1.5" result="coloredBlur" />
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur" />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <g font-family="'Space Grotesk', monospace, sans-serif" font-weight="800" filter="url(#glow)">
+                            <text x="0" y="35" font-size="32" fill="url(#nullGrad)" letter-spacing="-1">
+                                N<tspan fill="#06b6d4">Ø</tspan>LL
+                            </text>
+                            <text x="130" y="35" font-size="32" fill="url(#squadGrad)">SQUAD</text>
+                            <path d="M 2,45 L 110,45 L 120,38 L 125,45 L 300,45" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none" />
+                            <rect x="118" y="36" width="4" height="4" fill="#06b6d4" />
+                            <circle cx="305" cy="45" r="3" fill="#a855f7" />
+                        </g>
+                    </svg>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
+                        style="border-color: var(--glass-border);">
+                    <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
                 </button>
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                    <ul class="navbar-nav flex-grow-1 align-items-center">
+                        <li class="nav-item"><a class="nav-link" asp-page="/Index">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-page="/About">About Team</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-page="/Help">Knowledge Base</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-page="/Announcements">Broadcasts</a></li>
+
+                        @{
+                            // Determine where the "Dashboard" button should go based on role
+                            var role = Context.Session.GetString("user_role");
+                            string dashLink = "/Login"; // Default
+                            string dashText = "Login";
+                            string dashClass = "";
+
+                            if (role == "Admin")
+                            {
+                                dashLink = "/Admin/AdminDashboard";
+                                dashText = "Admin Dashboard";
+                                dashClass = "btn-nav-highlight";
+                            }
+                            else if (role == "Academic")
+                            {
+                                dashLink = "/AcademicDashboard";
+                                dashText = "My Dashboard";
+                                dashClass = "btn-nav-highlight";
+                            }
+                        }
+
+                        <li class="nav-item ms-auto">
+                            <a class="nav-link @dashClass" href="@dashLink">@dashText</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+    <div class="container-fluid p-0">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - GUC - <a asp-area="" asp-page="/Privacy">Privacy</a>
+    <footer class="footer">
+        <div class="container text-center">
+            &copy; 2025 - <strong>NULL SQUAD HR SYSTEM</strong> -
+            <a asp-page="/Privacy">Privacy Protocol</a>
         </div>
     </footer>
 

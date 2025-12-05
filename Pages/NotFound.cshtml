@@ -1,0 +1,152 @@
+@page
+@{
+    ViewData["Title"] = "404 - Signal Lost";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+
+<style>
+    /* --- THEME INHERITANCE --- */
+    :root {
+        --bg-color: #050507;
+        --accent-danger: #ef4444;
+        --accent-aqua: #06b6d4;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--bg-color);
+        font-family: 'Space Grotesk', sans-serif;
+        color: white;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    /* --- BACKGROUNDS --- */
+    .noise-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .red-glow {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, transparent 70%);
+        filter: blur(80px);
+        z-index: -2;
+        animation: pulseRed 4s infinite alternate;
+    }
+
+    /* --- CONTENT --- */
+    .error-container {
+        text-align: center;
+        position: relative;
+        z-index: 10;
+        padding: 3rem;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        max-width: 600px;
+    }
+
+    .error-code {
+        font-size: 8rem;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--accent-danger);
+        position: relative;
+        text-shadow: 2px 2px 0px rgba(6, 182, 212, 0.5);
+        animation: glitch 1s infinite;
+    }
+
+    .error-title {
+        font-size: 2rem;
+        letter-spacing: 4px;
+        margin-bottom: 1rem;
+        color: #fff;
+    }
+
+    .error-desc {
+        color: #94a3b8;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 2.5rem;
+        line-height: 1.6;
+    }
+
+    .btn-return {
+        display: inline-block;
+        padding: 0.8rem 2rem;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--accent-aqua);
+        color: var(--accent-aqua);
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 0.9rem;
+    }
+
+        .btn-return:hover {
+            background: var(--accent-aqua);
+            color: white;
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.4);
+        }
+
+    /* --- ANIMATIONS --- */
+    @@keyframes pulseRed {
+        0% {
+            opacity: 0.5;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+    }
+
+    @@keyframes glitch {
+        2%, 64% {
+            transform: translate(2px,0) skew(0deg);
+        }
+
+        4%, 60% {
+            transform: translate(-2px,0) skew(0deg);
+        }
+
+        62% {
+            transform: translate(0,0) skew(5deg);
+        }
+    }
+</style>
+
+<div class="noise-overlay"></div>
+<div class="red-glow"></div>
+
+<div class="error-container">
+    <div class="error-code">404</div>
+    <div class="error-title">SIGNAL LOST</div>
+    <p class="error-desc">
+        The coordinates you entered do not correspond to any known sector in the GUC System.
+        The page may have been moved to a classified archive or deleted.
+    </p>
+    <a href="/" class="btn-return">Return to Base</a>
+</div>

@@ -1,0 +1,284 @@
+﻿@page
+@model Guc_Uni_System.Pages.AboutModel
+@{
+    ViewData["Title"] = "About Us";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --bg-color: #030305;
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --accent-aqua: #06b6d4;
+        --accent-purple: #8b5cf6;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+    }
+
+    /* --- BACKGROUNDS --- */
+    .bg-light-source {
+        position: fixed;
+        bottom: -20%;
+        right: -10%;
+        width: 1000px;
+        height: 1000px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(0,0,0,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -2;
+        filter: blur(100px);
+    }
+
+    .noise-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        z-index: -1;
+        pointer-events: none;
+        mix-blend-mode: overlay;
+    }
+
+    .bg-vector-icon {
+        position: fixed;
+        top: 10%;
+        left: -5%;
+        width: 600px;
+        height: 600px;
+        opacity: 0.03;
+        z-index: -3;
+        pointer-events: none;
+    }
+
+    /* --- HERO --- */
+    .about-hero {
+        text-align: center;
+        padding: 4rem 0;
+    }
+
+    .about-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .about-desc {
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* --- TECH STACK --- */
+    .tech-stack {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 4rem;
+        flex-wrap: wrap;
+    }
+
+    .tech-badge {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--glass-border);
+        padding: 0.5rem 1.2rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: var(--accent-aqua);
+        font-family: 'Space Grotesk', sans-serif;
+        transition: all 0.3s;
+    }
+
+        .tech-badge:hover {
+            background: rgba(6, 182, 212, 0.1);
+            border-color: var(--accent-aqua);
+            transform: translateY(-3px);
+            color: white;
+        }
+
+    /* --- TEAM GRID --- */
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .team-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .team-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(139, 92, 246, 0.3);
+            background: rgba(255,255,255,0.05);
+        }
+
+    .team-avatar {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--accent-purple);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .team-name {
+        color: white;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        font-size: 1.1rem;
+    }
+
+    .team-role {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1.5rem;
+    }
+
+    .linkedin-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: rgba(0, 119, 181, 0.1);
+        color: #0077b5;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+        .linkedin-btn:hover {
+            background: #0077b5;
+            color: white;
+        }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        background: rgba(255,255,255,0.05);
+        color: var(--text-primary);
+        text-decoration: none;
+        border: 1px solid var(--glass-border);
+        transition: all 0.3s;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+    }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent-aqua);
+            color: white;
+        }
+</style>
+
+<div class="bg-light-source"></div>
+<div class="noise-overlay"></div>
+
+<svg class="bg-vector-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5">
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="M2 12h20"></path>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+</svg>
+
+<div class="container py-5 mb-5">
+
+    <a href="/" class="btn-back"><span>←</span> Return Home</a>
+
+    <div class="about-hero">
+        <h1 class="about-title">ARCHITECTS OF THE SYSTEM</h1>
+        <p class="about-desc">
+            The GUC HR System V.2.0 was engineered to streamline academic administration. Built with precision, security, and user experience at its core.
+        </p>
+    </div>
+
+    <div class="tech-stack">
+        <span class="tech-badge">ASP.NET Core</span>
+        <span class="tech-badge">SQL Server</span>
+        <span class="tech-badge">Entity Framework</span>
+        <span class="tech-badge">Bootstrap 5</span>
+        <span class="tech-badge">Glassmorphism</span>
+    </div>
+
+    <div class="team-grid">
+        <div class="team-card">
+            <div class="team-avatar">AO</div>
+            <div class="team-name">Abdelrahman Osama</div>
+            <div class="team-role">Full Stack Engineer</div>
+            <a href="https://www.linkedin.com" target="_blank" class="linkedin-btn">
+                <span>Connect</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+            </a>
+        </div>
+
+        <div class="team-card">
+            <div class="team-avatar" style="color: var(--accent-aqua);">AR</div>
+            <div class="team-name">Ahmad Reda</div>
+            <div class="team-role">Backend Architect</div>
+            <a href="https://www.linkedin.com" target="_blank" class="linkedin-btn">
+                <span>Connect</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+            </a>
+        </div>
+
+        <div class="team-card">
+            <div class="team-avatar" style="color: #fca5a5;">AL</div>
+            <div class="team-name">Ahmad Lotfy</div>
+            <div class="team-role">Database Specialist</div>
+            <a href="https://www.linkedin.com" target="_blank" class="linkedin-btn">
+                <span>Connect</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+            </a>
+        </div>
+
+        <div class="team-card">
+            <div class="team-avatar" style="color: #fbbf24;">AZ</div>
+            <div class="team-name">Abdelrahman El-Zeiny</div>
+            <div class="team-role">Frontend Developer</div>
+            <a href="https://www.linkedin.com" target="_blank" class="linkedin-btn">
+                <span>Connect</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+            </a>
+        </div>
+
+        <div class="team-card">
+            <div class="team-avatar" style="color: #34d399;">MT</div>
+            <div class="team-name">Mohannad Tamer</div>
+            <div class="team-role">System Analyst</div>
+            <a href="https://www.linkedin.com" target="_blank" class="linkedin-btn">
+                <span>Connect</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+            </a>
+        </div>
+    </div>
+
+</div>

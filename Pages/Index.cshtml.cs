@@ -5,9 +5,16 @@ namespace Guc_Uni_System.Pages
 {
     public class IndexModel : PageModel
     {
-        public IActionResult OnGet()
+        private readonly ILogger<IndexModel> _logger;
+
+        public IndexModel(ILogger<IndexModel> logger)
         {
-            return RedirectToPage("/Login");
+            _logger = logger;
+        }
+
+        public void OnGet()
+        {
+            // You can add logic here if you need to fetch stats for the homepage later
         }
     }
 }

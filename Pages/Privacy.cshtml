@@ -3,6 +3,186 @@
 @{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --bg-color: #030305;
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --accent-aqua: #06b6d4;
+        --accent-blue: #3b82f6;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+    }
+
+    /* --- BACKGROUNDS --- */
+    .bg-light-source {
+        position: fixed;
+        top: -20%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1000px;
+        height: 1000px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(0,0,0,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -2;
+        filter: blur(80px);
+    }
+
+    .noise-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        z-index: -1;
+        pointer-events: none;
+        mix-blend-mode: overlay;
+    }
+
+    .bg-vector-icon {
+        position: fixed;
+        top: 30%;
+        right: -10%;
+        width: 800px;
+        height: 800px;
+        opacity: 0.02;
+        z-index: -3;
+        pointer-events: none;
+        transform: rotate(-15deg);
+    }
+
+    /* --- CONTENT --- */
+    .privacy-header {
+        text-align: center;
+        margin-bottom: 4rem;
+        position: relative;
+    }
+
+    .privacy-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -2px;
+    }
+
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease;
+    }
+
+        .glass-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+    .policy-heading {
+        color: var(--accent-aqua);
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .policy-text {
+        color: var(--text-secondary);
+        line-height: 1.7;
+        font-size: 0.95rem;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        background: rgba(255,255,255,0.05);
+        color: var(--text-primary);
+        text-decoration: none;
+        border: 1px solid var(--glass-border);
+        transition: all 0.3s;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+    }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent-aqua);
+            color: white;
+        }
+</style>
+
+<div class="bg-light-source"></div>
+<div class="noise-overlay"></div>
+
+<svg class="bg-vector-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+</svg>
+
+<div class="container py-5">
+
+    <a href="/" class="btn-back"><span>←</span> Return Home</a>
+
+    <div class="privacy-header">
+        <h1 class="privacy-title">DATA PROTOCOLS</h1>
+        <p class="text-secondary" style="letter-spacing: 2px;">SECURE_HR_SYSTEM // V.2.0</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <div class="glass-card">
+                <h3 class="policy-heading"><span>🔒</span> Data Collection & Integrity</h3>
+                <p class="policy-text">
+                    The GUC HR System collects and processes personal data strictly for administrative, payroll, and academic purposes. All data entries, including attendance records, performance evaluations, and medical documentation, are stored in encrypted SQL Server environments. We adhere to strict data minimization principles, ensuring only necessary information is retained.
+                </p>
+            </div>
+
+            <div class="glass-card">
+                <h3 class="policy-heading"><span>🛡️</span> Access Control Levels</h3>
+                <p class="policy-text">
+                    System access is governed by Role-Based Access Control (RBAC).
+                    <br><br>
+                    • <strong>Admins:</strong> Have full system maintenance privileges.<br>
+                    • <strong>Academic Staff:</strong> Access is restricted to personal records and departmental management based on rank (Dean, Head of Dept).<br>
+                    • <strong>HR Staff:</strong> Access is limited to payroll processing and leave validation.
+                </p>
+            </div>
+
+            <div class="glass-card">
+                <h3 class="policy-heading"><span>🍪</span> Session & Cookies</h3>
+                <p class="policy-text">
+                    This application utilizes secure server-side sessions to maintain user authentication state. No personal tracking cookies are used for advertising purposes. Sessions automatically expire after 30 minutes of inactivity to prevent unauthorized access.
+                </p>
+            </div>
+
+            <div class="text-center mt-5">
+                <p class="text-secondary small">Last Policy Update: December 2025</p>
+            </div>
+
+        </div>
+    </div>
+</div>

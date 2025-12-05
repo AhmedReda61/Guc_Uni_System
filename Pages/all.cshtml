@@ -1,0 +1,539 @@
+﻿@page
+@model Guc_Uni_System.Pages.allModel
+@{
+    ViewData["Title"] = "Database Viewer";
+    Layout = "_Layout";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+
+<style>
+    /* --- LOCAL STYLES --- */
+    .page-header {
+        border-bottom: 1px solid var(--glass-border);
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 2.5rem;
+        background: linear-gradient(90deg, #fff, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    /* GLASS ACCORDION */
+    .accordion-glass {
+        --bs-accordion-bg: transparent;
+        --bs-accordion-btn-color: var(--text-primary);
+        --bs-accordion-btn-bg: rgba(255,255,255,0.02);
+        --bs-accordion-border-color: var(--glass-border);
+        --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem rgba(6, 182, 212, 0.25);
+    }
+
+    .accordion-item {
+        border: 1px solid var(--glass-border);
+        background: var(--glass-bg);
+        margin-bottom: 1rem;
+        border-radius: 12px !important;
+        overflow: hidden;
+        backdrop-filter: blur(12px);
+    }
+
+    .accordion-button {
+        font-weight: 600;
+        font-family: 'Space Grotesk', sans-serif;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+
+        .accordion-button:not(.collapsed) {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-aqua);
+        }
+
+    .accordion-body {
+        background: rgba(0,0,0,0.2);
+        padding: 0;
+    }
+
+    /* GLASS TABLES */
+    .table-container {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #cbd5e1;
+        font-size: 0.8rem; /* Slightly smaller to fit all columns */
+        margin: 0;
+        white-space: nowrap; /* Keeps columns on one line */
+    }
+
+        .custom-table th {
+            background: #050507;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--accent-aqua);
+        }
+
+        .custom-table td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            vertical-align: middle;
+        }
+
+        .custom-table tbody tr:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+    /* Badges - REMOVED from usage but kept in CSS in case you need them later
+    .badge-glass {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.1);
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+    */
+
+    .bg-light-source {
+        position: fixed;
+        top: 10%;
+        right: 10%;
+        width: 800px;
+        height: 800px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(0,0,0,0) 60%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -2;
+        filter: blur(80px);
+    }
+
+    .bg-vector-icon {
+        position: fixed;
+        bottom: 0;
+        right: -5%;
+        width: 600px;
+        height: 600px;
+        opacity: 0.02;
+        z-index: -3;
+        pointer-events: none;
+    }
+</style>
+
+<div class="bg-light-source"></div>
+<svg class="bg-vector-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+
+<div class="container mt-5 pb-5">
+
+    <div class="page-header">
+        <h2 class="page-title">DATABASE DIRECTORY</h2>
+        <p class="text-secondary mb-0">RAW_DATA_VIEWER // READ_ONLY_ACCESS</p>
+    </div>
+
+    <div class="accordion accordion-glass" id="dbAccordion">
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingEmp">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEmp" aria-expanded="true">
+                    Employees (@Model.employees.Count records)
+                </button>
+            </h2>
+            <div id="collapseEmp" class="accordion-collapse collapse show" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Password</th>
+                                    <th>Address</th>
+                                    <th>Dept</th>
+                                    <th>Roles</th>
+                                    <th>Job Type</th>
+                                    <th>Status</th>
+                                    <th>Balance (Ann/Acc)</th>
+                                    <th>Dayoff</th>
+                                    <th>Experience</th>
+                                    <th>Salary</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.employees)
+                                {
+                                <tr>
+                                    <td>@item.EmployeeId</td>
+                                    <td>@item.FirstName @item.LastName</td>
+                                    <td>@item.Email</td>
+                                    <td>@item.Password</td>
+                                    <td>@item.Address</td>
+                                    <td>@(item.DeptName ?? "-")</td>
+                                    <td>
+                                        @if (item.RoleNames != null && item.RoleNames.Any())
+                                            {
+                                        @(string.Join(", ", item.RoleNames.Select(r => r.RoleName)))
+                                            }
+                                            else { <span>-</span> }
+                                    </td>
+                                    <td>@item.TypeOfContract</td>
+                                    <td>@item.EmploymentStatus</td>
+                                    <td>@item.AnnualBalance / @item.AccidentalBalance</td>
+                                    <td>@item.OfficialDayOff</td>
+                                    <td>@item.YearsOfExperience</td>
+                                    <td>@item.Salary</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDept">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDept">
+                    Departments (@Model.deps.Count records)
+                </button>
+            </h2>
+            <div id="collapseDept" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Department Name</th>
+                                    <th>Number of Employees</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.deps)
+                                {
+                                <tr>
+                                    <td>@item.Department</td>
+                                    <td>@item.NumberOfEmployees</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingRoles">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRoles">
+                    Roles (@Model.roles.Count records)
+                </button>
+            </h2>
+            <div id="collapseRoles" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Role Name</th>
+                                    <th>Title</th>
+                                    <th>Rank</th>
+                                    <th>Base Salary</th>
+                                    <th>% YOE</th>
+                                    <th>% Overtime</th>
+                                    <th>Annual Bal</th>
+                                    <th>Accidental Bal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.roles)
+                                {
+                                <tr>
+                                    <td>@item.RoleName</td>
+                                    <td>@item.Title</td>
+                                    <td>@item.Rank</td>
+                                    <td>@item.BaseSalary</td>
+                                    <td>@item.PercentageYoe</td>
+                                    <td>@item.PercentageOvertime</td>
+                                    <td>@item.AnnualBalance</td>
+                                    <td>@item.AccidentalBalance</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingAtt">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAtt">
+                    Attendance (@Model.attendances.Count records)
+                </button>
+            </h2>
+            <div id="collapseAtt" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date</th>
+                                    <th>Emp ID</th>
+                                    <th>In</th>
+                                    <th>Out</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.attendances)
+                                {
+                                <tr>
+                                    <td>@item.AttendanceId</td>
+                                    <td>@item.Date</td>
+                                    <td>@item.EmpId</td>
+                                    <td>@item.CheckInTime</td>
+                                    <td>@item.CheckOutTime</td>
+                                    <td>@item.TotalDuration</td>
+                                    <td>@item.Status</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingAnn">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnn">
+                    Annual Leaves (@Model.ann_leaves.Count records)
+                </button>
+            </h2>
+            <div id="collapseAnn" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead><tr><th>Req ID</th><th>Emp ID</th><th>Replacement</th><th>Start</th><th>End</th><th>Days</th><th>Status</th></tr></thead>
+                            <tbody>
+                                @foreach (var l in Model.ann_leaves) {
+                                <tr><td>@l.RequestId</td><td>@l.EmpId</td><td>@l.ReplacementEmp</td><td>@l.Request.StartDate</td><td>@l.Request.EndDate</td><td>@l.Request.NumDays</td><td>@l.Request.FinalApprovalStatus</td></tr>
+ }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingAcc">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAcc">
+                    Accidental Leaves (@Model.acc_leaves.Count records)
+                </button>
+            </h2>
+            <div id="collapseAcc" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead><tr><th>Req ID</th><th>Emp ID</th><th>Start</th><th>End</th><th>Days</th><th>Status</th></tr></thead>
+                            <tbody>
+                                @foreach (var l in Model.acc_leaves) {
+                                <tr><td>@l.RequestId</td><td>@l.EmpId</td><td>@l.Request.StartDate</td><td>@l.Request.EndDate</td><td>@l.Request.NumDays</td><td>@l.Request.FinalApprovalStatus</td></tr>
+ }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingMed">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMed">
+                    Medical Leaves (@Model.medicals_leaves.Count records)
+                </button>
+            </h2>
+            <div id="collapseMed" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead><tr><th>Req ID</th><th>Emp ID</th><th>Type</th><th>Details</th><th>Start</th><th>End</th><th>Status</th></tr></thead>
+                            <tbody>
+                                @foreach (var l in Model.medicals_leaves) {
+                                <tr><td>@l.RequestId</td><td>@l.EmpId</td><td>@l.Type</td><td>@l.DisabilityDetails</td><td>@l.Request.StartDate</td><td>@l.Request.EndDate</td><td>@l.Request.FinalApprovalStatus</td></tr>
+ }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingUnp">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUnp">
+                    Unpaid Leaves (@Model.unpaid_leaves.Count records)
+                </button>
+            </h2>
+            <div id="collapseUnp" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead><tr><th>Req ID</th><th>Emp ID</th><th>Start</th><th>End</th><th>Days</th><th>Status</th></tr></thead>
+                            <tbody>
+                                @foreach (var l in Model.unpaid_leaves) {
+                                <tr><td>@l.RequestId</td><td>@l.EmpId</td><td>@l.Request.StartDate</td><td>@l.Request.EndDate</td><td>@l.Request.NumDays</td><td>@l.Request.FinalApprovalStatus</td></tr>
+ }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingComp">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseComp">
+                    Compensation Leaves (@Model.comp_leaves.Count records)
+                </button>
+            </h2>
+            <div id="collapseComp" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead><tr><th>Req ID</th><th>Emp ID</th><th>Reason</th><th>Original Date</th><th>Leave Date</th><th>Status</th></tr></thead>
+                            <tbody>
+                                @foreach (var l in Model.comp_leaves) {
+                                <tr><td>@l.RequestId</td><td>@l.EmpId</td><td>@l.Reason</td><td>@l.DateOfOriginalWorkday</td><td>@l.Request.StartDate</td><td>@l.Request.FinalApprovalStatus</td></tr>
+ }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingPay">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePay">
+                    Payroll (@Model.payrolls.Count records)
+                </button>
+            </h2>
+            <div id="collapsePay" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead><tr><th>Emp ID</th><th>Date</th><th>Amount</th><th>Bonus</th><th>Deductions</th></tr></thead>
+                            <tbody>
+                                @foreach (var item in Model.payrolls) {
+                                <tr><td>@item.EmpId</td><td>@item.PaymentDate</td><td>@item.FinalSalaryAmount</td><td>@item.BonusAmount</td><td>@item.DeductionsAmount</td></tr>
+ }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDed">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDed">
+                    Deductions (@Model.deductions.Count records)
+                </button>
+            </h2>
+            <div id="collapseDed" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead><tr><th>Emp ID</th><th>Date</th><th>Amount</th><th>Type</th><th>Status</th></tr></thead>
+                            <tbody>
+                                @foreach (var item in Model.deductions) {
+                                <tr><td>@item.EmpId</td><td>@item.Date</td><td>@item.Amount</td><td>@item.Type</td><td>@item.Status</td></tr>
+ }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingPerf">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePerf">
+                    Performance (@Model.performances.Count records)
+                </button>
+            </h2>
+            <div id="collapsePerf" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead><tr><th>ID</th><th>Emp ID</th><th>Semester</th><th>Rating</th><th>Comments</th></tr></thead>
+                            <tbody>
+                                @foreach (var item in Model.performances) {
+                                <tr><td>@item.PerformanceId</td><td>@item.EmpId</td><td>@item.Semester</td><td>@item.Rating</td><td>@item.Comments</td></tr>
+ }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingHoliday">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHoliday">
+                    Holidays (@Model.holidays.Count records)
+                </button>
+            </h2>
+            <div id="collapseHoliday" class="accordion-collapse collapse" data-bs-parent="#dbAccordion">
+                <div class="accordion-body">
+                    <div class="table-container">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.holidays)
+                                {
+                                <tr>
+                                    <td>@item.holiday_ID</td>
+                                    <td>@item.holiday_name</td>
+                                    <td>@item.from_date</td>
+                                    <td>@item.to_date</td>
+                                </tr>
+                                }
+                                @if (Model.holidays.Count == 0)
+                                {
+                                <tr><td colspan="4" class="text-center opacity-50 py-3">No holidays found.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

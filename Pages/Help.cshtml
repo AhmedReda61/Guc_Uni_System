@@ -1,0 +1,260 @@
+﻿@page
+@model Guc_Uni_System.Pages.HelpModel
+@{
+    ViewData["Title"] = "System Protocols";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --bg-color: #030305;
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --accent-aqua: #06b6d4;
+        --accent-purple: #8b5cf6;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+    }
+
+    /* --- BACKGROUNDS --- */
+    .bg-light-source {
+        position: fixed;
+        top: -10%;
+        left: -10%;
+        width: 1200px;
+        height: 1200px;
+        background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, rgba(0,0,0,0) 60%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -2;
+        filter: blur(100px);
+    }
+
+    .noise-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        z-index: -1;
+        pointer-events: none;
+        mix-blend-mode: overlay;
+    }
+
+    /* --- HERO --- */
+    .kb-header {
+        text-align: center;
+        margin-bottom: 4rem;
+        padding-top: 3rem;
+    }
+
+    .kb-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #fff 0%, #a5f3fc 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    .kb-search {
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+        .kb-search input {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            color: white;
+            border-radius: 50px;
+            padding: 1rem 1.5rem;
+            width: 100%;
+            font-size: 1.1rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+            .kb-search input:focus {
+                outline: none;
+                border-color: var(--accent-aqua);
+                box-shadow: 0 0 30px rgba(6, 182, 212, 0.15);
+                background: rgba(255,255,255,0.08);
+            }
+
+    /* --- CATEGORIES --- */
+    .category-title {
+        font-family: 'Space Grotesk', sans-serif;
+        color: var(--accent-aqua);
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        border-left: 3px solid var(--accent-aqua);
+        padding-left: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    /* --- ACCORDION --- */
+    .accordion-glass .accordion-item {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        margin-bottom: 1rem;
+        border-radius: 12px;
+        overflow: hidden;
+        backdrop-filter: blur(12px);
+        transition: border-color 0.3s;
+    }
+
+        .accordion-glass .accordion-item:hover {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+    .accordion-glass .accordion-button {
+        background: transparent;
+        color: white;
+        font-weight: 500;
+        font-size: 1.05rem;
+        box-shadow: none;
+        padding: 1.5rem;
+    }
+
+        .accordion-glass .accordion-button:not(.collapsed) {
+            background: rgba(255,255,255,0.02);
+            color: var(--accent-aqua);
+        }
+
+        .accordion-glass .accordion-button::after {
+            filter: invert(1);
+            opacity: 0.5;
+        }
+
+    .accordion-glass .accordion-body {
+        color: var(--text-secondary);
+        line-height: 1.7;
+        padding: 1.5rem;
+        border-top: 1px solid var(--glass-border);
+        font-size: 0.95rem;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        background: rgba(255,255,255,0.05);
+        color: var(--text-primary);
+        text-decoration: none;
+        border: 1px solid var(--glass-border);
+        transition: all 0.3s;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+    }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent-aqua);
+            color: white;
+        }
+</style>
+
+<div class="bg-light-source"></div>
+<div class="noise-overlay"></div>
+
+<div class="container py-5 mb-5">
+
+    <a href="/" class="btn-back"><span>←</span> Return Home</a>
+
+    <div class="kb-header">
+        <h1 class="kb-title">KNOWLEDGE BASE</h1>
+        <div class="kb-search">
+            <input type="text" id="searchInput" placeholder="Search protocols, rules, and guides..." onkeyup="filterFAQ()">
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <h4 class="category-title mt-4">Leave Protocols</h4>
+            <div class="accordion accordion-glass" id="accLeaves">
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q1">How is Annual Leave processed?</button></h2>
+                    <div id="q1" class="accordion-collapse collapse" data-bs-parent="#accLeaves">
+                        <div class="accordion-body">
+                            Annual leaves require a designated <strong>Replacement Employee</strong>. If the replacement is in the same department and not on leave, the request is automatically forwarded. Final approval depends on your current Annual Balance.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2">What are the rules for Compensation Leave?</button></h2>
+                    <div id="q2" class="accordion-collapse collapse" data-bs-parent="#accLeaves">
+                        <div class="accordion-body">
+                            Compensation leave is granted for work done on an official day off. To qualify, you must have attended for <strong>at least 8 hours</strong> on that specific day off. The request must be submitted within the same month.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3">Hierarchy for Unpaid Leave Approval</button></h2>
+                    <div id="q3" class="accordion-collapse collapse" data-bs-parent="#accLeaves">
+                        <div class="accordion-body">
+                            Unpaid leaves typically require approval from the <strong>Dean</strong> or <strong>Head of Department</strong>. If the requester is a Dean, approval escalates to the Vice President or President.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="category-title mt-5">Payroll & Deductions</h4>
+            <div class="accordion accordion-glass" id="accFinance">
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4">How are deductions calculated?</button></h2>
+                    <div id="q4" class="accordion-collapse collapse" data-bs-parent="#accFinance">
+                        <div class="accordion-body">
+                            Deductions are finalized at the end of the month.
+                            <ul>
+                                <li><strong>Missing Hours:</strong> Calculated based on hourly rate.</li>
+                                <li><strong>Missing Days:</strong> Calculated as (Salary / 30) per day.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5">When is Overtime applied?</button></h2>
+                    <div id="q5" class="accordion-collapse collapse" data-bs-parent="#accFinance">
+                        <div class="accordion-body">
+                            Overtime applies if your total attended hours exceed the required monthly hours. The rate is determined by your specific Role's overtime factor (e.g., Lecturers and TAs have different multipliers).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterFAQ() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toUpperCase();
+        const items = document.querySelectorAll('.accordion-item');
+
+        items.forEach(item => {
+            const btn = item.querySelector('.accordion-button');
+            const txt = btn.textContent || btn.innerText;
+            if (txt.toUpperCase().indexOf(filter) > -1) {
+                item.style.display = "";
+            } else {
+                item.style.display = "none";
+            }
+        });
+    }
+</script>

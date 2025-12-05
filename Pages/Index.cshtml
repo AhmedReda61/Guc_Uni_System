@@ -1,10 +1,432 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+
+<style>
+    /* --- THEME VARIABLES --- */
+    :root {
+        --bg-color: #030305;
+        --text-primary: #ffffff;
+        --text-secondary: #94a3b8;
+        --accent-aqua: #06b6d4;
+        --accent-blue: #3b82f6;
+        --accent-purple: #8b5cf6;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* --- 1. LOCAL VIDEO BACKGROUND --- */
+    .video-background {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: -99;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+        /* UPDATED SELECTOR FOR HTML5 VIDEO */
+        .video-background video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 100vh;
+            /* Fallback logic for aspect ratio */
+            min-width: 177.77vh;
+            min-height: 56.25vw;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0.1;
+            filter: contrast(1.2) saturate(1.1);
+            object-fit: cover; /* Ensures video covers screen without distortion */
+        }
+
+    /* --- 2. REFINED NOISE OVERLAY --- */
+    .noise-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        z-index: -90;
+        pointer-events: none;
+        mix-blend-mode: overlay;
+    }
+
+    /* --- 3. GRADIENT ORBS --- */
+    .orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(120px);
+        z-index: -95;
+        opacity: 0.3;
+        animation: floatOrb 25s infinite alternate ease-in-out;
+    }
+
+    .orb-1 {
+        top: -20%;
+        left: -10%;
+        width: 800px;
+        height: 800px;
+        background: var(--accent-blue);
+    }
+
+    .orb-2 {
+        bottom: -20%;
+        right: -10%;
+        width: 800px;
+        height: 800px;
+        background: var(--accent-purple);
+        animation-delay: -5s;
+    }
+
+    /* --- HERO SECTION --- */
+    .hero-section {
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        padding-top: 5vh;
+    }
+
+    .hero-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 5.5rem;
+        font-weight: 700;
+        line-height: 0.95;
+        background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 2;
+        text-shadow: 0 0 40px rgba(255,255,255,0.1);
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin-bottom: 3.5rem;
+        font-weight: 300;
+        line-height: 1.6;
+        z-index: 2;
+        backdrop-filter: blur(2px);
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    /* --- ROTATING TEXT RING --- */
+    .circle-text-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 650px;
+        height: 650px;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.12;
+    }
+
+    .circle-text {
+        width: 100%;
+        height: 100%;
+        animation: rotateText 40s linear infinite;
+    }
+
+    /* --- BUTTONS --- */
+    .btn-stellar-lg {
+        padding: 1rem 3rem;
+        border-radius: 100px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary-glow {
+        background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(59, 130, 246, 0.2));
+        color: white;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.15);
+    }
+
+        .btn-primary-glow:hover {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.3));
+            box-shadow: 0 0 50px rgba(59, 130, 246, 0.4);
+            transform: translateY(-4px) scale(1.02);
+            color: white;
+            border-color: rgba(255,255,255,0.3);
+        }
+
+    .btn-secondary-glow {
+        background: rgba(255,255,255,0.02);
+        color: var(--text-secondary);
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+        .btn-secondary-glow:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+            transform: translateY(-4px);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+    /* --- TEAM SECTION --- */
+    .team-section {
+        padding: 6rem 0 4rem 0;
+        position: relative;
+        z-index: 5;
+        background: linear-gradient(to top, var(--bg-color) 10%, transparent 100%);
+    }
+
+    .section-label {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        color: var(--accent-aqua);
+        margin-bottom: 3rem;
+        display: block;
+        text-align: center;
+        opacity: 0.8;
+    }
+
+    .team-grid {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        perspective: 1000px;
+    }
+
+    .team-card {
+        background: rgba(20, 20, 25, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+        width: 200px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .team-card:hover {
+            transform: translateY(-15px) rotateX(5deg);
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(20, 20, 25, 0.6);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+
+        .team-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(6,182,212,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .team-card:hover::after {
+            opacity: 1;
+        }
+
+    .team-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        margin: 0 auto 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: var(--accent-aqua);
+        border: 1px solid rgba(255,255,255,0.1);
+        font-weight: 600;
+        position: relative;
+        z-index: 2;
+    }
+
+    .team-name {
+        color: #e2e8f0;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.3rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .team-role {
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* --- GITHUB FLOATER --- */
+    .github-floater {
+        margin-top: 5rem;
+        padding: 0.8rem 1.5rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 50px;
+        background: rgba(255,255,255,0.02);
+        backdrop-filter: blur(5px);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+    }
+
+        .github-floater:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.15);
+            transform: scale(1.05);
+        }
+
+    /* Animations */
+    @@keyframes rotateText {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes floatOrb {
+        from {
+            transform: translate(0, 0);
+        }
+
+        to {
+            transform: translate(60px, 60px);
+        }
+    }
+</style>
+
+<div class="video-background">
+    <video autoplay muted loop playsinline>
+        <source src="video1.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+<div class="noise-overlay"></div> <div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="container hero-section">
+
+    <div class="circle-text-container">
+        <svg class="circle-text" viewBox="0 0 200 200">
+            <path id="textPath" d="M 100, 100 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0" fill="none" />
+            <text fill="#ffffff" font-family="Space Grotesk" font-weight="700" letter-spacing="4px" font-size="13">
+                <textPath href="#textPath">
+                    SYSTEM V.2.0 • UNIVERSITY HR MANAGEMENT • SECURE ACCESS •
+                </textPath>
+            </text>
+        </svg>
+    </div>
+
+    <h1 class="hero-title">GUC SYSTEM<br><span style="color: var(--accent-aqua); font-size: 0.4em; letter-spacing: 8px; text-transform:uppercase; font-weight: 300;">HR Operations V.2.0</span></h1>
+
+    <p class="hero-subtitle">
+        Next-generation university management. Handle payroll, attendance tracking, and performance analytics with a fluid glass interface.
+    </p>
+
+    <div class="d-flex gap-4 flex-wrap justify-content-center">
+        <a href="/Login" class="btn-stellar-lg btn-primary-glow">
+            <span>🚀 Login Portal</span>
+        </a>
+        <a href="/all" class="btn-stellar-lg btn-secondary-glow">
+            <span>📂 System Directory</span>
+        </a>
+    </div>
+
+</div>
+
+<div class="container team-section">
+    <span class="section-label">// ENGINEERING SQUAD</span>
+
+    <div class="team-grid">
+        <a href="https://www.linkedin.com" target="_blank" class="team-card">
+            <div class="team-avatar">AO</div>
+            <div class="team-name">Abdelrahman Osama</div>
+            <div class="team-role">Full Stack Engineer</div>
+        </a>
+
+        <a href="https://www.linkedin.com" target="_blank" class="team-card">
+            <div class="team-avatar" style="color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3);">AR</div>
+            <div class="team-name">Ahmad Reda</div>
+            <div class="team-role">Backend Architect</div>
+        </a>
+
+        <a href="https://www.linkedin.com" target="_blank" class="team-card">
+            <div class="team-avatar" style="color: var(--accent-aqua); border-color: rgba(6, 182, 212, 0.3);">AL</div>
+            <div class="team-name">Ahmad Lotfy</div>
+            <div class="team-role">Database Specialist</div>
+        </a>
+
+        <a href="https://www.linkedin.com" target="_blank" class="team-card">
+            <div class="team-avatar" style="color: #fca5a5; border-color: rgba(252, 165, 165, 0.3);">AZ</div>
+            <div class="team-name">Abdelrahman El-Zeiny</div>
+            <div class="team-role">Frontend Developer</div>
+        </a>
+
+        <a href="https://www.linkedin.com" target="_blank" class="team-card">
+            <div class="team-avatar" style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.3);">MT</div>
+            <div class="team-name">Mohannad Tamer</div>
+            <div class="team-role">System Analyst</div>
+        </a>
+    </div>
+
+    <div class="text-center">
+        <a href="https://github.com" target="_blank" class="github-floater">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" /></svg>
+            <span>View Source Code</span>
+        </a>
+    </div>
 </div>
