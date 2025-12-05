@@ -1,4 +1,12 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    // Read the role from the session to decide what links to show
+    var userRole = Context.Session.GetString("user_role");
+    var userId = Context.Session.GetInt32("user_id");
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -114,93 +122,38 @@
             }
     </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-glass">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">
-                    <svg class="navbar-brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 50" preserveAspectRatio="xMinYMid meet">
-                        <defs>
-                            <linearGradient id="nullGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
-                            </linearGradient>
-                            <linearGradient id="squadGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" style="stop-color:#a855f7;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
-                            </linearGradient>
-                            <filter id="glow">
-                                <feGaussianBlur stdDeviation="1.5" result="coloredBlur" />
-                                <feMerge>
-                                    <feMergeNode in="coloredBlur" />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                        </defs>
-                        <g font-family="'Space Grotesk', monospace, sans-serif" font-weight="800" filter="url(#glow)">
-                            <text x="0" y="35" font-size="32" fill="url(#nullGrad)" letter-spacing="-1">
-                                N<tspan fill="#06b6d4">Ø</tspan>LL
-                            </text>
-                            <text x="130" y="35" font-size="32" fill="url(#squadGrad)">SQUAD</text>
-                            <path d="M 2,45 L 110,45 L 120,38 L 125,45 L 300,45" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none" />
-                            <rect x="118" y="36" width="4" height="4" fill="#06b6d4" />
-                            <circle cx="305" cy="45" r="3" fill="#a855f7" />
-                        </g>
-                    </svg>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
-                        style="border-color: var(--glass-border);">
-                    <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+                <a class="navbar-brand" asp-area="" asp-page="/Index">GUC</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1 align-items-center">
-                        <li class="nav-item"><a class="nav-link" asp-page="/Index">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/About">About Team</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Help">Knowledge Base</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Announcements">Broadcasts</a></li>
-
-                        @{
-                            // Determine where the "Dashboard" button should go based on role
-                            var role = Context.Session.GetString("user_role");
-                            string dashLink = "/Login"; // Default
-                            string dashText = "Login";
-                            string dashClass = "";
-
-                            if (role == "Admin")
-                            {
-                                dashLink = "/Admin/AdminDashboard";
-                                dashText = "Admin Dashboard";
-                                dashClass = "btn-nav-highlight";
-                            }
-                            else if (role == "Academic")
-                            {
-                                dashLink = "/AcademicDashboard";
-                                dashText = "My Dashboard";
-                                dashClass = "btn-nav-highlight";
-                            }
-                        }
-
-                        <li class="nav-item ms-auto">
-                            <a class="nav-link @dashClass" href="@dashLink">@dashText</a>
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-
-    <div class="container-fluid p-0">
-        <main role="main">
+    <div class="container">
+        <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="footer">
-        <div class="container text-center">
-            &copy; 2025 - <strong>NULL SQUAD HR SYSTEM</strong> -
-            <a asp-page="/Privacy">Privacy Protocol</a>
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - GUC - <a asp-area="" asp-page="/Privacy">Privacy</a>
         </div>
     </footer>
 
