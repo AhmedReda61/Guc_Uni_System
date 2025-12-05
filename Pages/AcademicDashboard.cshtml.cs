@@ -15,29 +15,26 @@ namespace Guc_Uni_System.Pages
             _context = context;
         }
 
-        // --- ROLE FLAGS (Control UI Visibility) ---
         public bool IsDean { get; set; }
         public bool IsViceDean { get; set; }
         public bool IsPresident { get; set; }
         public bool IsVicePresident { get; set; }
-        public bool IsHeadOfDept { get; set; } // Generic flag for any management role
+        public bool IsHeadOfDept { get; set; }
 
-        // --- FILTER INPUTS (New!) ---
-        // SupportsGet = true allows passing these in the URL (e.g., ?TargetSemester=W23)
-        [BindProperty(SupportsGet = true)]
-        public string TargetSemester { get; set; }
-
-        [BindProperty(SupportsGet = true)]
-        public int TargetMonth { get; set; } = DateTime.Now.Month; // Default to current month
-
-        // --- DATA PROPERTIES (View Data) ---
+       
         public List<Performance> MyPerformances { get; set; } = new List<Performance>();
         public List<Attendance> MyAttendances { get; set; } = new List<Attendance>();
         public List<Payroll> MyPayrolls { get; set; } = new List<Payroll>();
         public List<Deduction> MyDeductions { get; set; } = new List<Deduction>();
         public List<LeaveStatusDto> MyLeavesStatus { get; set; } = new List<LeaveStatusDto>();
 
-        // --- FORM INPUTS (BindProperty) ---
+      
+        [BindProperty]
+        public string TargetSemester { get; set; }
+
+        [BindProperty]
+        public int TargetMonth { get; set; } = DateTime.Now.Month;
+
         // Annual Leave
         [BindProperty] public DateTime AnnualStart { get; set; }
         [BindProperty] public DateTime AnnualEnd { get; set; }
@@ -86,10 +83,9 @@ namespace Guc_Uni_System.Pages
             int myId = HttpContext.Session.GetInt32("user_id").GetValueOrDefault();
 
 
-            // --- 1. DETECT SPECIFIC ROLES (FIXED) ---
-            // We fetch the Employee and INCLUDE the 'RoleNames' list
+          
             var employee = _context.Employees
-                .Include(e => e.RoleNames) // Loads the linked Roles
+                .Include(e => e.RoleNames)
                 .FirstOrDefault(e => e.EmployeeId == myId);
 
             if (employee != null && employee.RoleNames != null)
@@ -101,11 +97,9 @@ namespace Guc_Uni_System.Pages
                 IsPresident = myRoleStrings.Contains("President");
                 IsVicePresident = myRoleStrings.Contains("Vice President");
             }
-
-            // Flag to show the Management Tab
             IsHeadOfDept = IsDean || IsViceDean || IsPresident || IsVicePresident;
 
-            // 1. My Performance
+            // 1.2) Performance (for Target Semester)
             try
             {
                 MyPerformances = _context.Performances
@@ -114,7 +108,7 @@ namespace Guc_Uni_System.Pages
             }
             catch { }
 
-            // 2. My Attendance (Current Month)
+            // 1.3) My Attendance (Current Month)
             try
             {
                 MyAttendances = _context.Attendances
@@ -123,7 +117,7 @@ namespace Guc_Uni_System.Pages
             }
             catch { }
 
-            // 3. Last Month Payroll
+            // 1.4) Last Month Payroll
             try
             {
                 MyPayrolls = _context.Payrolls
@@ -132,19 +126,16 @@ namespace Guc_Uni_System.Pages
             }
             catch { }
 
-            // 4. Deductions
+            // 1.5). Deductions (for Target Month)
             try
             {
-                // Using current month (12) as example
                 MyDeductions = _context.Deductions
                     .FromSqlRaw("SELECT * FROM dbo.Deductions_Attendance({0}, {1})", myId, TargetMonth)
                     .ToList();
             }
             catch { }
 
-            // 5. Leave Status (Custom Query because return type is not a Table Model)
-            // We use a raw query and map it manually
-            // Note: EF Core 8 can use Database.SqlQuery<T>
+            // 1.7) Leave Status (current month)
             var leavesData = _context.Database.SqlQueryRaw<LeaveStatusDto>(
                                 @"SELECT 
                                     request_ID AS RequestId, 
@@ -157,9 +148,7 @@ namespace Guc_Uni_System.Pages
             return Page();
         }
 
-        // --- ACTION HANDLERS ---
-
-        // Part 1.6: Annual Leave
+        //  1.6) Annual Leave
         public IActionResult OnPostApplyAnnual()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -170,7 +159,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Part 2.1: Accidental Leave
+        //  2.1) Accidental Leave
         public IActionResult OnPostApplyAccidental()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -181,7 +170,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Part 2.2: Medical Leave
+        //  2.2) Medical Leave
         public IActionResult OnPostApplyMedical()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -192,7 +181,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Part 2.3: Unpaid Leave
+        //  2.3) Unpaid Leave
         public IActionResult OnPostApplyUnpaid()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -203,7 +192,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Part 2.4: Compensation Leave
+        //  2.4) Compensation Leave
         public IActionResult OnPostApplyComp()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -214,7 +203,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Part 2.5: Approve Unpaid (Dean/Prez)
+        //  2.5) Approve Unpaid (Dean/Prez)
         public IActionResult OnPostApproveUnpaid()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -225,7 +214,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Part 2.6: Approve Annual (Dean/Prez)
+        //  2.6) Approve Annual (Dean/Prez)
         public IActionResult OnPostApproveAnnual()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -236,7 +225,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage();
         }
 
-        // Part 2.7: Evaluation (Dean)
+        //  2.7) Evaluation (Dean)
         public IActionResult OnPostEvaluate()
         {
             int myId = HttpContext.Session.GetInt32("user_id").Value;
@@ -253,7 +242,7 @@ namespace Guc_Uni_System.Pages
             return RedirectToPage("/Login");
         }
 
-        // Helper class for Requirement 7 (View Leave Status)
+        // (for View Leave Status)
         public class LeaveStatusDto
         {
             public int RequestId { get; set; }

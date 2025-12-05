@@ -468,14 +468,14 @@
                     <form method="post" asp-page-handler="UpdateDailyStatus" class="ajax-form mb-4">
                         <label class="text-secondary small mb-2">DAILY STATUS UPDATE</label>
                         <div class="input-group">
-                            <input type="number" asp-for="TargetEmployeeId" class="form-control" placeholder="Emp ID..." required />
+                            <input type="number" asp-for="TargetEmployeeId" class="form-control" placeholder="Emp ID..." min="1" required />
                             <button class="btn btn-glassy">Update</button>
                         </div>
                     </form>
 
                     <form method="post" asp-page-handler="UpdateAttendance" class="ajax-form mb-4">
                         <label class="text-secondary small mb-2">MANUAL ATTENDANCE LOG</label>
-                        <input type="number" asp-for="TargetEmployeeId" class="form-control mb-2" placeholder="Emp ID" required />
+                        <input type="number" asp-for="TargetEmployeeId" class="form-control mb-2" placeholder="Emp ID" min="1" required />
                         <div class="row g-2 mb-2">
                             <div class="col"><input type="time" asp-for="CheckIn" class="form-control" required /></div>
                             <div class="col"><input type="time" asp-for="CheckOut" class="form-control" required /></div>
@@ -488,7 +488,7 @@
                     <form method="post" class="ajax-form mb-3">
                         <label class="text-secondary small mb-2">ANOMALY FIX (REQ ID)</label>
                         <div class="input-group mb-2">
-                            <input type="number" asp-for="TargetEmployeeId" class="form-control" placeholder="Target ID..." />
+                            <input type="number" asp-for="TargetEmployeeId" class="form-control" placeholder="Target ID..." min="1" required />
                         </div>
                         <div class="d-flex gap-2">
                             <button type="submit" asp-page-handler="RemoveUnattendedDayOff" class="btn btn-glassy w-50">Remove DayOff</button>
@@ -499,8 +499,8 @@
                     <form method="post" asp-page-handler="ReplaceEmployee" class="ajax-form">
                         <label class="text-secondary small mb-2">REPLACE POSITION</label>
                         <div class="row g-2 mb-2">
-                            <div class="col"><input type="number" name="TargetEmployeeId" class="form-control" placeholder="Old ID" required /></div>
-                            <div class="col"><input type="number" asp-for="NewEmployeeId" class="form-control" placeholder="New ID" required /></div>
+                            <div class="col"><input type="number" name="TargetEmployeeId" class="form-control" placeholder="Old ID" min="1" required  /></div>
+                            <div class="col"><input type="number" asp-for="NewEmployeeId" class="form-control" placeholder="New ID" min="1" required /></div>
                         </div>
                         <button class="btn btn-glassy btn-glassy-primary w-100">Replace Employee</button>
                     </form>

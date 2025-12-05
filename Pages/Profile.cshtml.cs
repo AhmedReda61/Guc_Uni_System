@@ -25,7 +25,7 @@ namespace Guc_Uni_System.Pages
             int? userId = HttpContext.Session.GetInt32("user_id");
 
             // FALLBACK FOR TESTING (Remove this in production)
-            if (userId == null) userId = 1;
+            if (userId == null || userId == 0) userId = 1;
 
             if (userId == null) return RedirectToPage("/Login");
 
