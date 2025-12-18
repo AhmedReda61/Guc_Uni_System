@@ -1,5 +1,3 @@
-# Google Gemini
-
 ## University HR Management System
 
 ### Overview
@@ -110,6 +108,8 @@ Open `appsettings.json` in the project root and update the connection string:
 
 ## Contributors
 
-- Ahmed Reda
-- Add Team Member Name
-- Add Team Member Name
+- [Ahmed Reda](https://github.com/AhmedReda61)
+- [Abdelrahman Osama](https://github.com/abdelrahman-osama578)
+- [Abdelrahman Elzeiny](https://github.com/a141d)
+- [Ahmed Lotfy](https://github.com/ahmedlotfyhassanienelsamahy-hue)
+- [Mohannad Tamer](https://github.com/Mohannad-Tamer77)
